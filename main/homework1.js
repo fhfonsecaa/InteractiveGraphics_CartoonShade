@@ -3,7 +3,7 @@
 var canvas;
 var gl;
 
-var numVertices  = 36;
+var numVertices  = 120;
 
 var numChecks = 8;
 
@@ -17,57 +17,135 @@ var pointsArray = [];
 var colorsArray = [];
 
 var vertices = [
-    vec4( -0.5, -0.5,  0.5, 1.0 ),
-    vec4( -0.5,  0.5,  0.5, 1.0 ),
-    vec4( 0.5,  0.5,  0.5, 1.0 ),
-    vec4( 0.5, -0.5,  0.5, 1.0 ),
-    vec4( -0.5, -0.5, -0.5, 1.0 ),
-    vec4( -0.5,  0.5, -0.5, 1.0 ),
-    vec4( 0.5,  0.5, -0.5, 1.0 ),
-    vec4( 0.5, -0.5, -0.5, 1.0 )
+    vec4(-0.30,-0.580716,0.30,1.0),
+    vec4(-0.30,-0.520716,0.30,1.0),
+    vec4(-0.30,-0.580716,-0.30,1.0),
+    vec4(-0.30,-0.520716,-0.30,1.0),
+    vec4(0.30,-0.580716,0.30,1.0),
+    vec4(0.30,-0.520716,0.30,1.0),
+    vec4(0.30,-0.580716,-0.30,1.0),
+    vec4(0.30,-0.520716,-0.30,1.0),
+    vec4(-0.60,-0.228864,0.60,1.0),
+    vec4(0.00,0.979490,0.00,1.0),
+    vec4(-0.60,-0.228864,-0.60,1.0),
+    vec4(0.60,-0.228864,0.60,1.0),
+    vec4(0.60,-0.228864,-0.60,1.0),
+    vec4(-0.60,0.292376,-0.60,1.0),
+    vec4(0.00,-0.915978,-0.00,1.0),
+    vec4(-0.60,0.292376,0.60,1.0),
+    vec4(0.60,0.292376,-0.60,1.0),
+    vec4(0.60,0.292376,0.60,1.0),
+    vec4(-0.30,0.589361,0.30,1.0),
+    vec4(-0.30,0.649361,0.30,1.0),
+    vec4(-0.30,0.589361,-0.30,1.0),
+    vec4(-0.30,0.649361,-0.30,1.0),
+    vec4(0.30,0.589361,0.30,1.0),
+    vec4(0.30,0.649361,0.30,1.0),
+    vec4(0.30,0.589361,-0.30,1.0),
+    vec4(0.30,0.649361,-0.30,1.0)
 ];
 
 var vertexColors = [
+    // vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+    // vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+    // vec4( 1.0, 1.0, 0.0, 1.0 ),  // yellow
+    // vec4( 0.0, 1.0, 0.0, 1.0 ),  // green
+    // vec4( 0.0, 0.0, 1.0, 1.0 ),  // blue
+    // vec4( 1.0, 0.0, 1.0, 1.0 ),  // magenta
+    // vec4( 0.0, 1.0, 1.0, 1.0 ),  // white
+
+    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
     vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
     vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
-    vec4( 1.0, 1.0, 0.0, 1.0 ),  // yellow
-    vec4( 0.0, 1.0, 0.0, 1.0 ),  // green
-    vec4( 0.0, 0.0, 1.0, 1.0 ),  // blue
-    vec4( 1.0, 0.0, 1.0, 1.0 ),  // magenta
-    vec4( 0.0, 1.0, 1.0, 1.0 ),  // white
-    vec4( 0.0, 1.0, 1.0, 1.0 )   // cyan
+    vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+    vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+    vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+    vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+    vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+    vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+    vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+    vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+    vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+    vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+    vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+    vec4( 1.0, 0.0, 0.0, 1.0 )  // red
+
 ];
 
 var thetaLoc;
 
 function quad(a, b, c, d) {
-     pointsArray.push(vertices[a]);
-     colorsArray.push(vertexColors[a]);
+    a=a-1
+    b=b-1
+    c=c-1
+    d=d-1
+    pointsArray.push(vertices[a]);
+    colorsArray.push(vertexColors[a]);
 
-     pointsArray.push(vertices[b]);
-     colorsArray.push(vertexColors[a]);
+    pointsArray.push(vertices[b]);
+    colorsArray.push(vertexColors[a]);
 
-     pointsArray.push(vertices[c]);
-     colorsArray.push(vertexColors[a]);
+    pointsArray.push(vertices[c]);
+    colorsArray.push(vertexColors[a]);
 
-     pointsArray.push(vertices[a]);
-     colorsArray.push(vertexColors[a]);
+    pointsArray.push(vertices[a]);
+    colorsArray.push(vertexColors[a]);
 
-     pointsArray.push(vertices[c]);
-     colorsArray.push(vertexColors[a]);
+    pointsArray.push(vertices[c]);
+    colorsArray.push(vertexColors[a]);
 
-     pointsArray.push(vertices[d]);
-     colorsArray.push(vertexColors[a]);
+    pointsArray.push(vertices[d]);
+    colorsArray.push(vertexColors[a]);
 }
 
-function colorCube()
-{
-    quad( 1, 0, 3, 2 );
-    quad( 2, 3, 7, 6 );
-    quad( 3, 0, 4, 7 );
-    quad( 6, 5, 1, 2 );
-    quad( 4, 5, 6, 7 );
-    quad( 5, 4, 0, 1 );
+function tria(a, b, c) {
+    a=a-1
+    b=b-1
+    c=c-1
+    pointsArray.push(vertices[a]);
+    colorsArray.push(vertexColors[a]);
+
+    pointsArray.push(vertices[b]);
+    colorsArray.push(vertexColors[a]);
+
+    pointsArray.push(vertices[c]);
+    colorsArray.push(vertexColors[a]);
+}
+
+function colorCube(){
+    quad(1,2,4,3);
+    quad(3,4,8,7);
+    quad(7,8,6,5);
+    quad(5,6,2,1);
+    quad(3,7,5,1);
+    quad(8,4,2,6);
+    tria(9,10,11);
+    tria(11,10,13);
+    tria(13,10,12);
+    tria(12,10,9);
+    quad(11,13,12,9);
+    tria(14,15,16);
+    tria(16,15,18);
+    tria(18,15,17);
+    tria(17,15,14);
+    quad(16,18,17,14);
+    quad(19,20,22,21);
+    quad(21,22,26,25);
+    quad(25,26,24,23);
+    quad(23,24,20,19);
+    quad(21,25,23,19);
+    quad(26,22,20,24);
 }
 
 
