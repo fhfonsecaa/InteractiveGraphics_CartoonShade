@@ -16,4 +16,4 @@ with open(filePLY_path) as csv_read_file:
         csv_writer = csv.writer(csv_write_file, delimiter=' ')
         for row in csv_reader:
             print(row[0],row[1],row[2])
-            csv_writer.writerow(['vec4( {}, {}, {}, {}),'.format(row[0],row[1],row[2],1)])
+            csv_writer.writerow(['vec4( {}, {}, {}, {}),'.format(row[0],row[2],row[1],1)])
