@@ -16,6 +16,8 @@ var flag = true;
 var pointsArray = [];
 var colorsArray = [];
 
+var thetaLoc;
+
 var vertices = [
     vec4(-0.30,-0.580716,0.30,1.0),
     vec4(-0.30,-0.520716,0.30,1.0),
@@ -83,32 +85,6 @@ var vertexColors = [
 
 ];
 
-var thetaLoc;
-
-function quad(a, b, c, d) {
-    a=a-1
-    b=b-1
-    c=c-1
-    d=d-1
-    pointsArray.push(vertices[a]);
-    colorsArray.push(vertexColors[a]);
-
-    pointsArray.push(vertices[b]);
-    colorsArray.push(vertexColors[a]);
-
-    pointsArray.push(vertices[c]);
-    colorsArray.push(vertexColors[a]);
-
-    pointsArray.push(vertices[a]);
-    colorsArray.push(vertexColors[a]);
-
-    pointsArray.push(vertices[c]);
-    colorsArray.push(vertexColors[a]);
-
-    pointsArray.push(vertices[d]);
-    colorsArray.push(vertexColors[a]);
-}
-
 function tria(a, b, c) {
     a=a-1
     b=b-1
@@ -121,6 +97,11 @@ function tria(a, b, c) {
 
     pointsArray.push(vertices[c]);
     colorsArray.push(vertexColors[a]);
+}
+
+function quad(a, b, c, d) {
+    tria(a, b, c)
+    tria(a, c, d)
 }
 
 function colorCube(){
@@ -172,7 +153,6 @@ window.onload = function init() {
     var cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(colorsArray), gl.STATIC_DRAW );
-
     var vColor = gl.getAttribLocation( program, "aColor" );
     gl.vertexAttribPointer( vColor, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vColor );
@@ -180,7 +160,6 @@ window.onload = function init() {
     var vBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
     gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW );
-
     var vPosition = gl.getAttribLocation( program, "aPosition" );
     gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
