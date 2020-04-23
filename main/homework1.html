@@ -1,20 +1,61 @@
 <!DOCTYPE html>
 <html>
+<head> 
+    <style> 
+        .column{
+        float: left;
+        width: 20%;
+        padding: 5px;
+        }
+    </style> 
+</head> 
 
-<p>X-Angle:</p>
-<input type="range" min="0" max="360" value="0" class="slider" id="xAngleRange">
-<p>Y-Angle:</p>
-<input type="range" min="0" max="360" value="0" class="slider" id="yAngleRange">
-<p>Z-Angle:</p>
-<input type="range" min="0" max="360" value="0" class="slider" id="zAngleRange">
-
-<p>X-Position:</p>
-<input type="range" min="-100" max="100" value="0" class="slider" id="xPositionRange">
-<p>Y-Position:</p>
-<input type="range" min="-100" max="100" value="0" class="slider" id="yPositionRange">
-<p>Z-Position:</p>
-<input type="range" min="-100" max="100" value="0" class="slider" id="zPositionRange">
-
+<div class="row">
+    <div class="column">
+        <p>X-Angle:</p>
+        <input type="text" id="xAngleText" value="0" size="1" disabled></br>
+        <input type="range" min="0" max="360" value="0" class="slider" id="xAngleRange">
+        <p>Y-Angle:</p>
+        <input type="text" id="yAngleText" value="0" size="1" disabled></br>
+        <input type="range" min="0" max="360" value="0" class="slider" id="yAngleRange">
+        <p>Z-Angle:</p>
+        <input type="text" id="zAngleText" value="0" size="1" disabled></br>
+        <input type="range" min="0" max="360" value="0" class="slider" id="zAngleRange">
+    </div>
+    <div class="column">
+        <p>X-Position:</p>
+        <input type="text" id="xPositionText" value="0" size="1" disabled></br>
+        <input type="range" min="-100" max="100" value="0" class="slider" id="xPositionRange">
+        <p>Y-Position:</p>
+        <input type="text" id="yPositionText" value="0" size="1" disabled></br>
+        <input type="range" min="-100" max="100" value="0" class="slider" id="yPositionRange">
+        <p>Z-Position:</p>
+        <input type="text" id="zPositionText" value="0" size="1" disabled></br>
+        <input type="range" min="-100" max="100" value="0" class="slider" id="zPositionRange">
+    </div>
+    <div class="column">
+        <p>Left:</p>
+        <input type="text" id="leftViewText" value="-1" size="1" disabled></br>
+        <input type="range" min="-100" max="0" value="-100" class="slider" id="leftViewRange">
+        <p>Bottom:</p>
+        <input type="text" id="bottomViewText" value="-1" size="1" disabled></br>
+        <input type="range" min="-100" max="0" value="-100" class="slider" id="bottomViewRange">
+        <p>Near:</p>
+        <input type="text" id="nearViewText" value="-100" size="1" disabled></br>
+        <input type="range" min="-100" max="0" value="-100" class="slider" id="nearViewRange">
+    </div>
+    <div class="column">
+        <p>Right:</p>
+        <input type="text" id="rightViewText" value="1" size="1" disabled></br>
+        <input type="range" min="0" max="100" value="100" class="slider" id="rightViewRange">
+        <p>Top:</p>
+        <input type="text" id="topViewText" value="1" size="1" disabled></br>
+        <input type="range" min="0" max="100" value="100" class="slider" id="topViewRange">
+        <p>Far:</p>
+        <input type="text" id="farViewText" value="100" size="1" disabled></br>
+        <input type="range" min="0" max="100" value="100" class="slider" id="farViewRange">
+    </div>
+  </div>
 </br>
 
 
@@ -28,12 +69,12 @@ in  vec4 aPosition;
 out vec4 vColor;
 
 uniform mat4 uModelViewMatrix;
-//uniform mat4 uProjectionMatrix;
+uniform mat4 uProjectionMatrix;
 
 void main()
 {   vec4 NN = vec4(aNormal,0);
 
-    gl_Position = uModelViewMatrix *aPosition;
+    gl_Position = uProjectionMatrix*uModelViewMatrix *aPosition;
     //gl_Position = aPosition;
     vColor = aColor;
 }

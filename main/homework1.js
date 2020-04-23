@@ -18,37 +18,81 @@ var modelViewMatrix, projectionMatrix;
 var xAngle = 0;
 var yAngle = 0;
 var zAngle = 0;
-
 var xAngleSlider = document.getElementById("xAngleRange");
 xAngleSlider.oninput = function() {
     xAngle = this.value;
+    document.getElementById('xAngleText').value=xAngle;
 }
 var yAngleSlider = document.getElementById("yAngleRange");
 yAngleSlider.oninput = function() {
     yAngle = this.value;
+    document.getElementById('yAngleText').value=yAngle;
 }
 var zAngleSlider = document.getElementById("zAngleRange");
 zAngleSlider.oninput = function() {
     zAngle = this.value;
+    document.getElementById('zAngleText').value=zAngle;
 }
 
 var xPosition = 0;
 var yPosition = 0;
 var zPosition = 0;
 var positionScaleFactor = 100
-
 var xPositionSlider = document.getElementById("xPositionRange");
 xPositionSlider.oninput = function() {
     xPosition = this.value/positionScaleFactor;
+    document.getElementById('xPositionText').value=xPosition;
 }
 var yPositionSlider = document.getElementById("yPositionRange");
 yPositionSlider.oninput = function() {
     yPosition = this.value/positionScaleFactor;
+    document.getElementById('yPositionText').value=yPosition;
 }
 var zPositionSlider = document.getElementById("zPositionRange");
 zPositionSlider.oninput = function() {
     zPosition = this.value/positionScaleFactor;
+    document.getElementById('zPositionText').value=zPosition;
 }
+
+
+var leftView = -1;
+var rightView = 1;
+var bottomView = -1;
+var topView = 1;
+var nearView = -100;
+var farView = 100;
+var viewScaleFactor = 100;
+var leftViewSlider = document.getElementById("leftViewRange");
+leftViewSlider.oninput = function() {
+    leftView = this.value/viewScaleFactor;
+    document.getElementById('leftViewText').value=leftView;
+}
+var rightViewSlider = document.getElementById("rightViewRange");
+rightViewSlider.oninput = function() {
+    rightView = this.value/viewScaleFactor;
+    document.getElementById('rightViewText').value=rightView;
+}
+var bottomViewSlider = document.getElementById("bottomViewRange");
+bottomViewSlider.oninput = function() {
+    bottomView = this.value/viewScaleFactor;
+    document.getElementById('bottomViewText').value=bottomView;
+}
+var topViewSlider = document.getElementById("topViewRange");
+topViewSlider.oninput = function() {
+    topView = this.value/viewScaleFactor;
+    document.getElementById('topViewText').value=topView;
+}
+var nearViewSlider = document.getElementById("nearViewRange");
+nearViewSlider.oninput = function() {
+    nearView = this.value;
+    document.getElementById('nearViewText').value=nearView;
+}
+var farViewSlider = document.getElementById("farViewRange");
+farViewSlider.oninput = function() {
+    farView = this.value;
+    document.getElementById('farViewText').value=farView;
+}
+
 
 var vertices = [
     vec4(-0.30,-0.580716,0.30,1.0),
@@ -172,7 +216,6 @@ function loadSolid(){
 }
 
 window.onload = function init() {
-
     canvas = document.getElementById( "gl-canvas" );
 
     gl = canvas.getContext('webgl2');
@@ -188,7 +231,6 @@ window.onload = function init() {
     gl.useProgram( program );
 
     loadSolid();
-
 
     var cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
@@ -221,14 +263,18 @@ window.onload = function init() {
 var render = function() {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    projectionMatrix = ortho(leftView, rightView, bottomView, topView, nearView, farView);
+    gl.uniformMatrix4fv( gl.getUniformLocation(program,"uProjectionMatrix"),
+        false, flatten(projectionMatrix));
+
     modelViewMatrix = mat4();
     modelViewMatrix = mult(modelViewMatrix, translate(xPosition, yPosition, zPosition));
     modelViewMatrix = mult(modelViewMatrix, rotate(xAngle, vec3(1, 0, 0)));
     modelViewMatrix = mult(modelViewMatrix, rotate(yAngle, vec3(0, 1, 0)));
     modelViewMatrix = mult(modelViewMatrix, rotate(zAngle, vec3(0, 0, 1)));
 
-    gl.uniformMatrix4fv(gl.getUniformLocation(program,
-            "uModelViewMatrix"), false, flatten(modelViewMatrix));
+    gl.uniformMatrix4fv(gl.getUniformLocation(program,"uModelViewMatrix"),
+        false, flatten(modelViewMatrix));
 
     gl.drawArrays( gl.TRIANGLES, 0, numVertices );
     requestAnimationFrame(render);
