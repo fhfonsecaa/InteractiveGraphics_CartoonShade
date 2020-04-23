@@ -13,7 +13,23 @@ var pointsArray = [];
 var colorsArray = [];
 var normalsArray = [];
 
-var modelViewMatrix, projectionMatrix;
+var modelViewMatrix, projectionMatrix, normMatrix;
+
+var dirLightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
+var dirLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
+var dirLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+var dirLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+
+var posLightPosition = vec4(1.0, 1.0, 1.0, 1.0 );
+var posLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
+var posLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+var posLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+
+var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
+var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0 );
+var materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+var materialShininess = 20.0;
+
 
 var eyeDistance=0.2;
 var eyeTheta=0;
@@ -71,7 +87,6 @@ perspectiveCheckBox.onclick = function() {
     nearViewSlider.disabled=!perspectiveFlag;
     farViewSlider.disabled=!perspectiveFlag;
 }
-
 
 var vertices = [
     vec4(-0.30,-0.580716,0.30,1.0),
@@ -226,6 +241,19 @@ window.onload = function init() {
     initInputElements();
     loadSolid();
 
+    var dirAmbientProduct = mult(dirLightAmbient, materialAmbient);
+    var dirDiffuseProduct = mult(dirLightDiffuse, materialDiffuse);
+    var dirSpecularProduct = mult(dirLightSpecular, materialSpecular);
+
+    // var posAmbientProduct = mult(posLightAmbient, materialAmbient);
+    // var posDiffuseProduct = mult(posLightDiffuse, materialDiffuse);
+    // var posSpecularProduct = mult(posLightSpecular, materialSpecular);
+
+    // var spotAmbientProduct = mult(spotLightAmbient, materialAmbient);
+    // var spotDiffuseProduct = mult(spotLightDiffuse, materialDiffuse);
+    // var spotSpecularProduct = mult(spotLightSpecular, materialSpecular);
+
+
     var cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(colorsArray), gl.STATIC_DRAW );
@@ -247,6 +275,17 @@ window.onload = function init() {
     gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vNormal);
 
+    gl.uniform4fv( gl.getUniformLocation(program,
+        "uAmbientProduct"),flatten(dirAmbientProduct));
+     gl.uniform4fv( gl.getUniformLocation(program,
+        "uDiffuseProduct"),flatten(dirDiffuseProduct));
+     gl.uniform4fv( gl.getUniformLocation(program,
+        "uSpecularProduct"),flatten(dirSpecularProduct));
+     gl.uniform4fv( gl.getUniformLocation(program,
+        "uLightPosition"),flatten(dirLightPosition));
+     gl.uniform1f( gl.getUniformLocation(program,
+        "uShininess"),materialShininess);
+
     console.log(vColor);
     console.log(vPosition);
     console.log(vNormal);
@@ -262,12 +301,17 @@ var render = function() {
     }else{
         projectionMatrix = mat4();
     }
-    gl.uniformMatrix4fv( gl.getUniformLocation(program,"uProjectionMatrix"),
-    false, flatten(projectionMatrix));
+    gl.uniformMatrix4fv(gl.getUniformLocation(program,"uProjectionMatrix"),
+                        false, flatten(projectionMatrix));
+
 
     modelViewMatrix = lookAt(get_eye(eyeDistance,eyeTheta,eyePhi),at,up);
     gl.uniformMatrix4fv(gl.getUniformLocation(program,"uModelViewMatrix"),
-        false, flatten(modelViewMatrix));
+                        false, flatten(modelViewMatrix));
+
+    normMatrix = normalMatrix(modelViewMatrix, true);
+    gl.uniformMatrix3fv(gl.getUniformLocation(program,"uNormalMatrix"),
+                        false, flatten(normMatrix)  );
 
     gl.drawArrays( gl.TRIANGLES, 0, numVertices );
     requestAnimationFrame(render);
