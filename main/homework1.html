@@ -1,15 +1,29 @@
 <!DOCTYPE html>
 <html>
 
-<p>Theta slider:</p>
-<input type="range" min="0" max="360" value="0" class="slider" id="thetaRange">
+<p>X-Angle:</p>
+<input type="range" min="0" max="360" value="0" class="slider" id="xAngleRange">
+<p>Y-Angle:</p>
+<input type="range" min="0" max="360" value="0" class="slider" id="yAngleRange">
+<p>Z-Angle:</p>
+<input type="range" min="0" max="360" value="0" class="slider" id="zAngleRange">
+
+<p>X-Position:</p>
+<input type="range" min="-100" max="100" value="0" class="slider" id="xPositionRange">
+<p>Y-Position:</p>
+<input type="range" min="-100" max="100" value="0" class="slider" id="yPositionRange">
+<p>Z-Position:</p>
+<input type="range" min="-100" max="100" value="0" class="slider" id="zPositionRange">
+
+</br>
+
 
 <script id="vertex-shader" type="x-shader/x-vertex">
 #version 300 es
 
+in  vec3 aNormal;
 in  vec4 aColor;
 in  vec4 aPosition;
-in  vec3 aNormal;
 
 out vec4 vColor;
 
@@ -17,7 +31,8 @@ uniform mat4 uModelViewMatrix;
 //uniform mat4 uProjectionMatrix;
 
 void main()
-{
+{   vec4 NN = vec4(aNormal,0);
+
     gl_Position = uModelViewMatrix *aPosition;
     //gl_Position = aPosition;
     vColor = aColor;

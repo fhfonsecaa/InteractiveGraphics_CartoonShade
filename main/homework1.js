@@ -14,11 +14,40 @@ var colorsArray = [];
 var normalsArray = [];
 
 var modelViewMatrix, projectionMatrix;
-var theta = 0;
 
-var thetaSlider = document.getElementById("thetaRange");
-thetaSlider.oninput = function() {
-    theta = this.value;
+var xAngle = 0;
+var yAngle = 0;
+var zAngle = 0;
+
+var xAngleSlider = document.getElementById("xAngleRange");
+xAngleSlider.oninput = function() {
+    xAngle = this.value;
+}
+var yAngleSlider = document.getElementById("yAngleRange");
+yAngleSlider.oninput = function() {
+    yAngle = this.value;
+}
+var zAngleSlider = document.getElementById("zAngleRange");
+zAngleSlider.oninput = function() {
+    zAngle = this.value;
+}
+
+var xPosition = 0;
+var yPosition = 0;
+var zPosition = 0;
+var positionScaleFactor = 100
+
+var xPositionSlider = document.getElementById("xPositionRange");
+xPositionSlider.oninput = function() {
+    xPosition = this.value/positionScaleFactor;
+}
+var yPositionSlider = document.getElementById("yPositionRange");
+yPositionSlider.oninput = function() {
+    yPosition = this.value/positionScaleFactor;
+}
+var zPositionSlider = document.getElementById("zPositionRange");
+zPositionSlider.oninput = function() {
+    zPosition = this.value/positionScaleFactor;
 }
 
 var vertices = [
@@ -90,7 +119,9 @@ var vertexColors = [
 
 function get_norm(p,V,U) {
     // console.log(cross(subtract(V,p),subtract(U,p)));
-    return cross(subtract(V,p),subtract(U,p));
+    // var normal_vector = cross(subtract(V,p),subtract(U,p));
+    // return [normal_vector[0],normal_vector[1],normal_vector[2],0];
+    return vec3(cross(subtract(V,p),subtract(U,p)));
 }
 
 function tria(a, b, c) {
@@ -158,12 +189,6 @@ window.onload = function init() {
 
     loadSolid();
 
-    var nBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW);
-    var vNormal = gl.getAttribLocation(program, "aNormal");
-    gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vNormal);
 
     var cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
@@ -179,6 +204,17 @@ window.onload = function init() {
     gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
 
+    var nBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW);
+    var vNormal = gl.getAttribLocation(program, "aNormal");
+    gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vNormal);
+
+    console.log(vColor);
+    console.log(vPosition);
+    console.log(vNormal);
+
     render();
 }
 
@@ -186,9 +222,10 @@ var render = function() {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     modelViewMatrix = mat4();
-    // modelViewMatrix = mult(modelViewMatrix, rotate(theta[xAxis], vec3(1, 0, 0)));
-    // modelViewMatrix = mult(modelViewMatrix, rotate(theta[yAxis], vec3(0, 1, 0)));
-    modelViewMatrix = mult(modelViewMatrix, rotate(theta, vec3(0, 0, 1)));
+    modelViewMatrix = mult(modelViewMatrix, translate(xPosition, yPosition, zPosition));
+    modelViewMatrix = mult(modelViewMatrix, rotate(xAngle, vec3(1, 0, 0)));
+    modelViewMatrix = mult(modelViewMatrix, rotate(yAngle, vec3(0, 1, 0)));
+    modelViewMatrix = mult(modelViewMatrix, rotate(zAngle, vec3(0, 0, 1)));
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program,
             "uModelViewMatrix"), false, flatten(modelViewMatrix));
