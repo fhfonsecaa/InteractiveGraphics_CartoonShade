@@ -59,8 +59,8 @@ var leftView = -1;
 var rightView = 1;
 var bottomView = -1;
 var topView = 1;
-var nearView = -100;
-var farView = 100;
+var nearView = -1;
+var farView = 1;
 var viewScaleFactor = 100;
 var leftViewSlider = document.getElementById("leftViewRange");
 leftViewSlider.oninput = function() {
@@ -84,12 +84,12 @@ topViewSlider.oninput = function() {
 }
 var nearViewSlider = document.getElementById("nearViewRange");
 nearViewSlider.oninput = function() {
-    nearView = this.value;
+    nearView = this.value/viewScaleFactor;
     document.getElementById('nearViewText').value=nearView;
 }
 var farViewSlider = document.getElementById("farViewRange");
 farViewSlider.oninput = function() {
-    farView = this.value;
+    farView = this.value/viewScaleFactor;
     document.getElementById('farViewText').value=farView;
 }
 
