@@ -15,63 +15,33 @@ var normalsArray = [];
 
 var modelViewMatrix, projectionMatrix;
 
-var xAngle = 0;
-var yAngle = 0;
-var zAngle = 0;
-var xAngleSlider = document.getElementById("xAngleRange");
-xAngleSlider.oninput = function() {
-    xAngle = this.value;
-    document.getElementById('xAngleText').value=xAngle;
-}
-var yAngleSlider = document.getElementById("yAngleRange");
-yAngleSlider.oninput = function() {
-    yAngle = this.value;
-    document.getElementById('yAngleText').value=yAngle;
-}
-var zAngleSlider = document.getElementById("zAngleRange");
-zAngleSlider.oninput = function() {
-    zAngle = this.value;
-    document.getElementById('zAngleText').value=zAngle;
-}
-
-var xPosition = 0;
-var yPosition = 0;
-var zPosition = 0;
+var eyeDistance=0;
+var eyeTheta=0;
+var eyePhi=0;
+var at = vec3(0.0, 0.0, 0.0);
+var up = vec3(0.0, 1.0, 0.0);
 var positionScaleFactor = 100
-var xPositionSlider = document.getElementById("xPositionRange");
-xPositionSlider.oninput = function() {
-    xPosition = this.value/positionScaleFactor;
-    document.getElementById('xPositionText').value=xPosition;
+var eyeDistanceSlider = document.getElementById("eyeDistanceRange");
+eyeDistanceSlider.oninput = function() {
+    eyeDistance = this.value/positionScaleFactor;
+    document.getElementById('eyeDistanceText').value=eyeDistance;
 }
-var yPositionSlider = document.getElementById("yPositionRange");
-yPositionSlider.oninput = function() {
-    yPosition = this.value/positionScaleFactor;
-    document.getElementById('yPositionText').value=yPosition;
+var eyeThetaSlider = document.getElementById("eyeThetaRange");
+eyeThetaSlider.oninput = function() {
+    eyeTheta = this.value;
+    document.getElementById('eyeThetaText').value=eyeTheta;
 }
-var zPositionSlider = document.getElementById("zPositionRange");
-zPositionSlider.oninput = function() {
-    zPosition = this.value/positionScaleFactor;
-    document.getElementById('zPositionText').value=zPosition;
+var eyePhiSlider = document.getElementById("eyePhiRange");
+eyePhiSlider.oninput = function() {
+    eyePhi = this.value;
+    document.getElementById('eyePhiText').value=eyePhi;
 }
 
-
-var leftView = -1;
-var rightView = 1;
-var bottomView = -1;
-var topView = 1;
+var fovyView = 0;
+var aspectView = 1;
 var nearView = -1;
 var farView = 1;
 var viewScaleFactor = 100;
-var leftViewSlider = document.getElementById("leftViewRange");
-leftViewSlider.oninput = function() {
-    leftView = this.value/viewScaleFactor;
-    document.getElementById('leftViewText').value=leftView;
-}
-var rightViewSlider = document.getElementById("rightViewRange");
-rightViewSlider.oninput = function() {
-    rightView = this.value/viewScaleFactor;
-    document.getElementById('rightViewText').value=rightView;
-}
 var bottomViewSlider = document.getElementById("bottomViewRange");
 bottomViewSlider.oninput = function() {
     bottomView = this.value/viewScaleFactor;
@@ -215,6 +185,13 @@ function loadSolid(){
     quad(26,22,20,24);
 }
 
+function get_eye(distance,theta,phi) {
+    var vEye = vec3(distance*Math.sin(theta)*Math.cos(phi),
+                    distance*Math.sin(theta)*Math.sin(phi),
+                    distance*Math.cos(theta));
+    return vEye;
+}
+
 window.onload = function init() {
     canvas = document.getElementById( "gl-canvas" );
 
@@ -267,12 +244,7 @@ var render = function() {
     gl.uniformMatrix4fv( gl.getUniformLocation(program,"uProjectionMatrix"),
         false, flatten(projectionMatrix));
 
-    modelViewMatrix = mat4();
-    modelViewMatrix = mult(modelViewMatrix, translate(xPosition, yPosition, zPosition));
-    modelViewMatrix = mult(modelViewMatrix, rotate(xAngle, vec3(1, 0, 0)));
-    modelViewMatrix = mult(modelViewMatrix, rotate(yAngle, vec3(0, 1, 0)));
-    modelViewMatrix = mult(modelViewMatrix, rotate(zAngle, vec3(0, 0, 1)));
-
+    modelViewMatrix = lookAt(get_eye(eyeDistance,eyeTheta,eyePhi),at,up);
     gl.uniformMatrix4fv(gl.getUniformLocation(program,"uModelViewMatrix"),
         false, flatten(modelViewMatrix));
 
