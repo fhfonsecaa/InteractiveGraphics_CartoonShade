@@ -15,7 +15,7 @@ var normalsArray = [];
 
 var modelViewMatrix, projectionMatrix;
 
-var eyeDistance=0;
+var eyeDistance=0.2;
 var eyeTheta=0;
 var eyePhi=0;
 var at = vec3(0.0, 0.0, 0.0);
@@ -28,29 +28,30 @@ eyeDistanceSlider.oninput = function() {
 }
 var eyeThetaSlider = document.getElementById("eyeThetaRange");
 eyeThetaSlider.oninput = function() {
-    eyeTheta = this.value;
-    document.getElementById('eyeThetaText').value=eyeTheta;
+    eyeTheta = this.value/positionScaleFactor* Math.PI/180.0;
+    document.getElementById('eyeThetaText').value=this.value/positionScaleFactor;
 }
 var eyePhiSlider = document.getElementById("eyePhiRange");
 eyePhiSlider.oninput = function() {
-    eyePhi = this.value;
-    document.getElementById('eyePhiText').value=eyePhi;
+    eyePhi = this.value/positionScaleFactor* Math.PI/180.0;
+    document.getElementById('eyePhiText').value=this.value/positionScaleFactor;
 }
 
-var fovyView = 0;
+var perspectiveFlag = false;
+var fovyView = 170;
 var aspectView = 1;
 var nearView = -1;
-var farView = 1;
+var farView = 0.2;
 var viewScaleFactor = 100;
-var bottomViewSlider = document.getElementById("bottomViewRange");
-bottomViewSlider.oninput = function() {
-    bottomView = this.value/viewScaleFactor;
-    document.getElementById('bottomViewText').value=bottomView;
+var fovyViewSlider = document.getElementById("fovyViewRange");
+fovyViewSlider.oninput = function() {
+    fovyView = this.value;
+    document.getElementById('fovyViewText').value=this.value;
 }
-var topViewSlider = document.getElementById("topViewRange");
-topViewSlider.oninput = function() {
-    topView = this.value/viewScaleFactor;
-    document.getElementById('topViewText').value=topView;
+var aspectViewSlider = document.getElementById("aspectViewRange");
+aspectViewSlider.oninput = function() {
+    aspectView = this.value/viewScaleFactor;
+    document.getElementById('aspectViewText').value=aspectView;
 }
 var nearViewSlider = document.getElementById("nearViewRange");
 nearViewSlider.oninput = function() {
@@ -61,6 +62,14 @@ var farViewSlider = document.getElementById("farViewRange");
 farViewSlider.oninput = function() {
     farView = this.value/viewScaleFactor;
     document.getElementById('farViewText').value=farView;
+}
+var perspectiveCheckBox = document.getElementById("perspectiveCheckBox");
+perspectiveCheckBox.onclick = function() {
+    perspectiveFlag = this.checked;
+    fovyViewSlider.disabled=!perspectiveFlag;
+    aspectViewSlider.disabled=!perspectiveFlag;
+    nearViewSlider.disabled=!perspectiveFlag;
+    farViewSlider.disabled=!perspectiveFlag;
 }
 
 
@@ -160,6 +169,13 @@ function quad(a, b, c, d) {
     tria(a, c, d)
 }
 
+function initInputElements(){
+    fovyViewSlider.disabled=!perspectiveFlag;
+    aspectViewSlider.disabled=!perspectiveFlag;
+    nearViewSlider.disabled=!perspectiveFlag;
+    farViewSlider.disabled=!perspectiveFlag;
+}
+
 function loadSolid(){
     quad(1,2,4,3);
     quad(3,4,8,7);
@@ -206,7 +222,8 @@ window.onload = function init() {
     //  Load shaders and initialize attribute buffers
     program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
-
+    
+    initInputElements();
     loadSolid();
 
     var cBuffer = gl.createBuffer();
@@ -240,9 +257,13 @@ window.onload = function init() {
 var render = function() {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    projectionMatrix = ortho(leftView, rightView, bottomView, topView, nearView, farView);
+    if(perspectiveFlag){
+        projectionMatrix = perspective(fovyView, aspectView, nearView, farView);
+    }else{
+        projectionMatrix = mat4();
+    }
     gl.uniformMatrix4fv( gl.getUniformLocation(program,"uProjectionMatrix"),
-        false, flatten(projectionMatrix));
+    false, flatten(projectionMatrix));
 
     modelViewMatrix = lookAt(get_eye(eyeDistance,eyeTheta,eyePhi),at,up);
     gl.uniformMatrix4fv(gl.getUniformLocation(program,"uModelViewMatrix"),
