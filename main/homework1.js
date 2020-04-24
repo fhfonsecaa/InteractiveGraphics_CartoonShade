@@ -300,13 +300,13 @@ window.onload = function init() {
     gl.enableVertexAttribArray(vNormal);
 
     gl.uniform4fv( gl.getUniformLocation(program,
-        "uAmbientProduct"),flatten(dirAmbientProduct));
+        "uDirAmbientProduct"),flatten(dirAmbientProduct));
      gl.uniform4fv( gl.getUniformLocation(program,
-        "uDiffuseProduct"),flatten(dirDiffuseProduct));
+        "uDirDiffuseProduct"),flatten(dirDiffuseProduct));
      gl.uniform4fv( gl.getUniformLocation(program,
-        "uSpecularProduct"),flatten(dirSpecularProduct));
+        "uDirSpecularProduct"),flatten(dirSpecularProduct));
      gl.uniform4fv( gl.getUniformLocation(program,
-        "uLightPosition"),flatten(dirLightPosition));
+        "uDirLightPosition"),flatten(dirLightPosition));
      gl.uniform1f( gl.getUniformLocation(program,
         "uShininess"),materialShininess);
 
