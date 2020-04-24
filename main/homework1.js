@@ -20,10 +20,17 @@ var dirLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var dirLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var dirLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
-var posLightPosition = vec4(1.0, 1.0, 1.0, 1.0 );
-var posLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
-var posLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
-var posLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+var spotLightPosition = vec4(1.0, 2.0, 3.0, 1.0 );
+var spotLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
+var spotLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+var spotLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+var spotLightDirection = vec4(-0.5,1.0,2.0,1.0);
+var lightCutOff=0.867;
+
+// var posLightPosition = vec4(1.0, 1.0, 1.0, 1.0 );
+// var posLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
+// var posLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+// var posLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
 var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
 var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0 );
@@ -156,9 +163,6 @@ var vertexColors = [
 ];
 
 function get_norm(p,V,U) {
-    // console.log(cross(subtract(V,p),subtract(U,p)));
-    // var normal_vector = cross(subtract(V,p),subtract(U,p));
-    // return [normal_vector[0],normal_vector[1],normal_vector[2],0];
     return vec3(cross(subtract(V,p),subtract(U,p)));
 }
 
@@ -273,9 +277,9 @@ window.onload = function init() {
     // var posDiffuseProduct = mult(posLightDiffuse, materialDiffuse);
     // var posSpecularProduct = mult(posLightSpecular, materialSpecular);
 
-    // var spotAmbientProduct = mult(spotLightAmbient, materialAmbient);
-    // var spotDiffuseProduct = mult(spotLightDiffuse, materialDiffuse);
-    // var spotSpecularProduct = mult(spotLightSpecular, materialSpecular);
+    var spotAmbientProduct = mult(spotLightAmbient, materialAmbient);
+    var spotDiffuseProduct = mult(spotLightDiffuse, materialDiffuse);
+    var spotSpecularProduct = mult(spotLightSpecular, materialSpecular);
 
 
     var cBuffer = gl.createBuffer();
@@ -309,6 +313,20 @@ window.onload = function init() {
         "uDirLightPosition"),flatten(dirLightPosition));
      gl.uniform1f( gl.getUniformLocation(program,
         "uShininess"),materialShininess);
+
+    gl.uniform4fv( gl.getUniformLocation(program,
+        "uSpotAmbientProduct"),flatten(spotAmbientProduct) );
+    gl.uniform4fv( gl.getUniformLocation(program,
+        "uSpotDiffuseProduct"),flatten(spotDiffuseProduct) );
+    gl.uniform4fv( gl.getUniformLocation(program,
+        "uSpotSpecularProduct"),flatten(spotSpecularProduct) );
+    gl.uniform4fv( gl.getUniformLocation(program,
+        "uSpotLightPosition"),flatten(spotLightPosition) );
+    gl.uniform1f( gl.getUniformLocation(program,
+        "uSpotLightDirection"),spotLightDirection );
+
+    gl.uniform1f( gl.getUniformLocation(program,
+        "uLightCutOff"),lightCutOff );
 
     render();
 }
