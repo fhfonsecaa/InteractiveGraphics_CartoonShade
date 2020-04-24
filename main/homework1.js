@@ -31,7 +31,7 @@ var materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialShininess = 20.0;
 
 
-var eyeDistance=0.2;
+var eyeDistance=-0.2;
 var eyeTheta=0;
 var eyePhi=0;
 var at = vec3(0.0, 0.0, 0.0);
