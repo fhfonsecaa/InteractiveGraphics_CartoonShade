@@ -163,25 +163,49 @@ function get_norm(p,V,U) {
 }
 
 function tria(a, b, c) {
-    a=a-1
-    b=b-1
-    c=c-1
-    pointsArray.push(vertices[a]);
-    colorsArray.push(vertexColors[a]);
-    normalsArray.push(get_norm(vertices[a],vertices[b],vertices[c]));
+    var ac=a-1
+    var bc=b-1
+    var cc=c-1
+    var normal = get_norm(vertices[ac],vertices[bc],vertices[cc]);
 
-    pointsArray.push(vertices[b]);
-    colorsArray.push(vertexColors[a]);
-    normalsArray.push(get_norm(vertices[b],vertices[a],vertices[c]));
+    pointsArray.push(vertices[ac]);
+    colorsArray.push(vertexColors[ac]);
+    normalsArray.push(normal);
 
-    pointsArray.push(vertices[c]);
-    colorsArray.push(vertexColors[a]);
-    normalsArray.push(get_norm(vertices[c],vertices[a],vertices[b]));
+    pointsArray.push(vertices[bc]);
+    colorsArray.push(vertexColors[ac]);
+    normalsArray.push(normal);
+
+    pointsArray.push(vertices[cc]);
+    colorsArray.push(vertexColors[ac]);
+    normalsArray.push(normal);
 }
 
 function quad(a, b, c, d) {
-    tria(a, b, c)
-    tria(a, c, d)
+    var ac=a-1
+    var bc=b-1
+    var cc=c-1
+    var dc=d-1
+    var normal = get_norm(vertices[ac],vertices[bc],vertices[cc]);
+
+    pointsArray.push(vertices[ac]);
+    colorsArray.push(vertexColors[ac]);
+    normalsArray.push(normal);
+    pointsArray.push(vertices[bc]);
+    colorsArray.push(vertexColors[ac]);
+    normalsArray.push(normal);
+    pointsArray.push(vertices[cc]);
+    colorsArray.push(vertexColors[ac]);
+    normalsArray.push(normal);
+    pointsArray.push(vertices[ac]);
+    colorsArray.push(vertexColors[ac]);
+    normalsArray.push(normal);
+    pointsArray.push(vertices[cc]);
+    colorsArray.push(vertexColors[ac]);
+    normalsArray.push(normal);
+    pointsArray.push(vertices[dc]);
+    colorsArray.push(vertexColors[ac]);
+    normalsArray.push(normal);
 }
 
 function initInputElements(){
@@ -285,10 +309,6 @@ window.onload = function init() {
         "uLightPosition"),flatten(dirLightPosition));
      gl.uniform1f( gl.getUniformLocation(program,
         "uShininess"),materialShininess);
-
-    console.log(vColor);
-    console.log(vPosition);
-    console.log(vNormal);
 
     render();
 }
