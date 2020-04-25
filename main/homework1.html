@@ -17,10 +17,18 @@
         <input type="range" min="-100" max="100" value="-20" class="slider" id="eyeDistanceRange">
         <p>Theta Angle:</p>
         <input type="text" id="eyeThetaText" value="0" size="1" disabled></br>
-        <input type="range" min="0" max="36000" value="0" class="slider" id="eyeThetaRange">
+        <input type="range" min="0" max="360" value="0" class="slider" id="eyeThetaRange">
         <p>Phi Angle:</p>
         <input type="text" id="eyePhiText" value="0" size="1" disabled></br>
-        <input type="range" min="0" max="36000" value="0" class="slider" id="eyePhiRange">
+        <input type="range" min="0" max="360" value="0" class="slider" id="eyePhiRange">
+        </br>
+        <input type="checkbox" id="dirLightCheckBox" name="dirLightCheckBox">
+        <label for="dirLightCheckBox">Directional Light</label><br>
+        <input type="checkbox" id="spotLightCheckBox" name="spotLightCheckBox">
+        <label for="spotLightCheckBox">Spot Light</label><br>
+        <p>Spot Light Rotation:</p>
+        <input type="text" id="spotLightRotationText" value="0" size="1" disabled></br>
+        <input type="range" min="0" max="360" value="0" class="slider" id="spotLightRotationRange">
     </div>
     <div class="column">
         <input type="checkbox" id="perspectiveCheckBox" name="perspectiveCheckBox">
@@ -56,66 +64,92 @@ out vec4 vColor;
 uniform vec4 uDirAmbientProduct, uDirDiffuseProduct, uDirSpecularProduct, uDirLightPosition;
 uniform vec4 uSpotAmbientProduct, uSpotDiffuseProduct, uSpotSpecularProduct, uSpotLightPosition, uSpotLightDirection;
 
+uniform mat4 uSpotLightRotationMatrix;
 uniform mat4 uModelViewMatrix;
 uniform mat4 uProjectionMatrix;
 
 uniform float uShininess;
 uniform float uLightCutOff;
 
+uniform bool uDirLightFlag;
+uniform bool uSpotLightFlag;
+
+uniform float uSpotLightLimit;
+
 vec4 oPosition;
 
 void main()
 {   
     oPosition = uModelViewMatrix * aPosition;
+
     // Transform vertex normal into eye coordinates
     vec3 N = normalize((uModelViewMatrix*aNormal).xyz);
 
     /*******************Directional******************/
-    // vector from vertex to light on eye coordinates
-    vec3 dirL;
-
-    // light vector without rotation of light
-    if(uDirLightPosition.w == 0.0) dirL = normalize((uModelViewMatrix * uDirLightPosition).xyz);
-    else dirL = normalize((uModelViewMatrix * uDirLightPosition - oPosition).xyz);
+    vec4 dirAmbient;
+    vec4  dirDiffuse;
+    vec4  dirSpecular;
+    if(uDirLightFlag){
+        // vector from vertex to light on eye coordinates
+        vec3 dirL;
     
-    // vector from vertex to viewer in eye coordinates
-    vec3 dirE = normalize(-oPosition.xyz);
-    vec3 dirH = normalize(dirL + dirE);
+        if(uDirLightPosition.w == 0.0) dirL = normalize((uModelViewMatrix * uDirLightPosition).xyz);
+        else dirL = normalize((uModelViewMatrix * uDirLightPosition - oPosition).xyz);
+        
+        // vector from vertex to viewer in eye coordinates
+        vec3 dirE = normalize(-oPosition.xyz);
+        vec3 dirH = normalize(dirL + dirE);
+    
+        // Compute terms in the illumination equation
+        dirAmbient = uDirAmbientProduct;
+    
+        float dirKd = max(dot(dirL, N), 0.0 );
+        dirDiffuse = dirKd*uDirDiffuseProduct;
+    
+        float Ks = pow( max(dot(N, dirH), 0.0), uShininess);
+        dirSpecular = Ks * uDirSpecularProduct;
+    
+        if( dot(dirL, N) < 0.0) dirSpecular = vec4(0.0, 0.0, 0.0, 1.0);
+    }else{
+        dirAmbient = vec4(0, 0, 0, 0);
+        dirDiffuse = vec4(0, 0, 0, 0);
+        dirSpecular = vec4(0, 0, 0, 0);
+    }
 
-    // Compute terms in the illumination equation
-    vec4 dirAmbient = uDirAmbientProduct;
-
-    float dirKd = max(dot(dirL, N), 0.0 );
-    vec4  dirDiffuse = dirKd*uDirDiffuseProduct;
-
-    float Ks = pow( max(dot(N, dirH), 0.0), uShininess);
-    vec4  dirSpecular = Ks * uDirSpecularProduct;
-
-    if( dot(dirL, N) < 0.0) dirSpecular = vec4(0.0, 0.0, 0.0, 1.0);
 
     /*******************SpotLight******************/
-    vec3 spotL;
+    vec4 spotAmbient;
+    vec4 spotDiffuse;
+    vec4 spotSpecular;
+    if(uSpotLightFlag){
+        vec3 spotL;
 
-    // light vector without rotation of light
-    if(uSpotLightPosition.w == 0.0) spotL = normalize((uModelViewMatrix * uSpotLightPosition).xyz);
-    else spotL = normalize((uModelViewMatrix * uSpotLightPosition - oPosition).xyz);
+        // light vector without rotation of light
+        if(uSpotLightPosition.w == 0.0) spotL = normalize((uModelViewMatrix * uSpotLightRotationMatrix * uSpotLightPosition).xyz);
+        else spotL = normalize((uModelViewMatrix * uSpotLightRotationMatrix * uSpotLightPosition - oPosition).xyz);
+        
+        // vector from vertex to viewer in eye coordinates
+        vec3 spotE = normalize(-oPosition.xyz);
+        vec3 spotH = normalize(spotL + spotE);
     
-    // vector from vertex to viewer in eye coordinates
-    vec3 spotE = normalize(-oPosition.xyz);
-    vec3 spotH = normalize(spotL + spotE);
-
-    vec3 spotD=uSpotLightDirection.xyz;
-    vec4 spotAmbient=uSpotAmbientProduct;
-    float spotKd=max(dot(spotL,N),0.0);
-    vec4 spotDiffuse=spotKd*uSpotDiffuseProduct;
-    float spotKs=pow(max(dot(N,spotH),0.0), uShininess);
-    vec4 spotSpecular=spotKs*uSpotSpecularProduct;
-
-    if(dot(spotL,N)<0.0) spotSpecular=vec4(0.0,0.0,0.0,1.0);
+        vec3 spotD=uSpotLightDirection.xyz;
+        spotAmbient=uSpotAmbientProduct;
+        float spotKd=max(dot(spotL,N),0.0);
+        spotDiffuse=spotKd*uSpotDiffuseProduct;
+        
+        float spotKs=pow(max(dot(N,spotH),0.0), uShininess);
+        spotSpecular=spotKs*uSpotSpecularProduct;
     
-    float lEffect= dot(normalize(spotD), normalize((spotL+spotE)));
-    
-    //if(lEffect>lCutOff)
+        if(dot(spotL,N)<0.0) spotSpecular=vec4(0.0,0.0,0.0,1.0);
+        
+        float lEffect= dot(normalize(spotD), normalize((spotL+spotE)));
+        
+        //if(lEffect>lCutOff)
+    }else{
+        spotAmbient = vec4(0, 0, 0, 0);
+        spotDiffuse = vec4(0, 0, 0, 0);
+        spotSpecular = vec4(0, 0, 0, 0);
+    }
 
     vec4 ambient = dirAmbient + spotAmbient;
     vec4 diffuse = dirDiffuse + spotDiffuse;
@@ -126,8 +160,7 @@ void main()
     vColor = ambient + diffuse + specular;
     vColor.a = 1.0;
 
-
-    gl_Position = uProjectionMatrix*uModelViewMatrix *aPosition;
+    //gl_Position = uProjectionMatrix*uModelViewMatrix *aPosition;
     //vColor = aColor;
 }
 </script>

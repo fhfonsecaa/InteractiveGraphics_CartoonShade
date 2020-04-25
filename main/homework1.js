@@ -14,36 +14,34 @@ var colorsArray = [];
 var normalsArray = [];
 
 var modelViewMatrix, projectionMatrix, normMatrix;
+var spotLightRotationMatrix;
 
-var dirLightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
+var dirLightFlag = true;
+var dirLightPosition = vec4(1.0, -1.0, 1.0, 0.0 );
 var dirLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var dirLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var dirLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
+var spotLightFlag = false;
 var spotLightPosition = vec4(1.0, 2.0, 3.0, 1.0 );
 var spotLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var spotLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var spotLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
-var spotLightDirection = vec4(-0.5,1.0,2.0,1.0);
-var lightCutOff=0.867;
-
-// var posLightPosition = vec4(1.0, 1.0, 1.0, 1.0 );
-// var posLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
-// var posLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
-// var posLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+var spotLightDirection = vec4(-0.5,3.0,2.0,1.0);
+var spotLightLimit=50;
 
 var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
-var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0 );
+var materialDiffuse = vec4( 1.0, 0.5, 0.0, 1.0 );
 var materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialShininess = 20.0;
-
 
 var eyeDistance=-0.2;
 var eyeTheta=0;
 var eyePhi=0;
 var at = vec3(0.0, 0.0, 0.0);
 var up = vec3(0.0, 1.0, 0.0);
-var positionScaleFactor = 100
+var positionScaleFactor = 100;
+var spotLightRotation = 0;
 var eyeDistanceSlider = document.getElementById("eyeDistanceRange");
 eyeDistanceSlider.oninput = function() {
     eyeDistance = this.value/positionScaleFactor;
@@ -51,13 +49,27 @@ eyeDistanceSlider.oninput = function() {
 }
 var eyeThetaSlider = document.getElementById("eyeThetaRange");
 eyeThetaSlider.oninput = function() {
-    eyeTheta = this.value/positionScaleFactor* Math.PI/180.0;
-    document.getElementById('eyeThetaText').value=this.value/positionScaleFactor;
+    eyeTheta = this.value* Math.PI/180.0;
+    document.getElementById('eyeThetaText').value=this.value;
 }
 var eyePhiSlider = document.getElementById("eyePhiRange");
 eyePhiSlider.oninput = function() {
-    eyePhi = this.value/positionScaleFactor* Math.PI/180.0;
-    document.getElementById('eyePhiText').value=this.value/positionScaleFactor;
+    eyePhi = this.value* Math.PI/180.0;
+    document.getElementById('eyePhiText').value=this.value;
+}
+var spotLightRotationSlider = document.getElementById("spotLightRotationRange");
+spotLightRotationSlider.oninput = function() {
+    spotLightRotation = this.value;
+    document.getElementById('spotLightRotationText').value=this.value;
+}
+var dirLightCheckBox = document.getElementById("dirLightCheckBox");
+dirLightCheckBox.onclick = function() {
+    dirLightFlag = this.checked;
+}
+var spotLightCheckBox = document.getElementById("spotLightCheckBox");
+spotLightCheckBox.onclick = function() {
+    spotLightFlag = this.checked;
+    spotLightRotationRange.disabled=!spotLightFlag;
 }
 
 var perspectiveFlag = false;
@@ -213,6 +225,8 @@ function quad(a, b, c, d) {
 }
 
 function initInputElements(){
+    spotLightRotationRange.disabled=!spotLightFlag;
+
     fovyViewSlider.disabled=!perspectiveFlag;
     aspectViewSlider.disabled=!perspectiveFlag;
     nearViewSlider.disabled=!perspectiveFlag;
@@ -273,14 +287,9 @@ window.onload = function init() {
     var dirDiffuseProduct = mult(dirLightDiffuse, materialDiffuse);
     var dirSpecularProduct = mult(dirLightSpecular, materialSpecular);
 
-    // var posAmbientProduct = mult(posLightAmbient, materialAmbient);
-    // var posDiffuseProduct = mult(posLightDiffuse, materialDiffuse);
-    // var posSpecularProduct = mult(posLightSpecular, materialSpecular);
-
     var spotAmbientProduct = mult(spotLightAmbient, materialAmbient);
     var spotDiffuseProduct = mult(spotLightDiffuse, materialDiffuse);
     var spotSpecularProduct = mult(spotLightSpecular, materialSpecular);
-
 
     var cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
@@ -326,13 +335,23 @@ window.onload = function init() {
         "uSpotLightDirection"),spotLightDirection );
 
     gl.uniform1f( gl.getUniformLocation(program,
-        "uLightCutOff"),lightCutOff );
+        "uSpotLightLimit"),spotLightLimit );
 
     render();
 }
 
 var render = function() {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    gl.uniform1f(gl.getUniformLocation(program,"uDirLightFlag"), dirLightFlag);
+    gl.uniform1f(gl.getUniformLocation(program,"uSpotLightFlag"), spotLightFlag);
+
+    spotLightRotationMatrix = mat4();
+    // spotLightRotationMatrix = mult(spotLightRotationMatrix, rotate(theta[xAxis], vec3(1, 0, 0)));
+    spotLightRotationMatrix = mult(spotLightRotationMatrix, rotate(spotLightRotation, vec3(0, 1, 0)));
+    // spotLightRotationMatrix = mult(spotLightRotationMatrix, rotate(theta[zAxis], vec3(0, 0, 1)));
+    gl.uniformMatrix4fv(gl.getUniformLocation(program,"uSpotLightRotationMatrix"),
+                        false, flatten(spotLightRotationMatrix));
 
     if(perspectiveFlag){
         projectionMatrix = perspective(fovyView, aspectView, nearView, farView);
@@ -354,13 +373,3 @@ var render = function() {
     gl.drawArrays( gl.TRIANGLES, 0, numVertices );
     requestAnimationFrame(render);
 }
-
-
-
-
-
-
-
-
-
-
