@@ -34,7 +34,7 @@ var materialDiffuse = vec4( 1.0, 0.5, 0.0, 1.0 );
 var materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialShininess = 20.0;
 
-var eyeDistance=-0.2;
+var eyeDistance=-0.1;
 var eyeTheta=30;
 var eyePhi=30;
 var at = vec3(0.0, 0.0, 0.0);
@@ -346,9 +346,7 @@ var render = function() {
     gl.uniform1f(gl.getUniformLocation(program,"uSpotLightFlag"), spotLightFlag);
 
     spotLightRotationMatrix = mat4();
-    // spotLightRotationMatrix = mult(spotLightRotationMatrix, rotate(theta[xAxis], vec3(1, 0, 0)));
     spotLightRotationMatrix = mult(spotLightRotationMatrix, rotate(spotLightRotation, vec3(0, 1, 0)));
-    // spotLightRotationMatrix = mult(spotLightRotationMatrix, rotate(theta[zAxis], vec3(0, 0, 1)));
     gl.uniformMatrix4fv(gl.getUniformLocation(program,"uSpotLightRotationMatrix"),
                         false, flatten(spotLightRotationMatrix));
 
