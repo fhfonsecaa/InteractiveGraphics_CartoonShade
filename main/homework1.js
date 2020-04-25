@@ -18,7 +18,7 @@ var spotLightRotationMatrix;
 
 var dirLightFlag = false;
 var dirLightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
-var dirLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
+var dirLightAmbient = vec4(0.1, 0.1, 0.1, 1.0 );
 var dirLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var dirLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
@@ -28,13 +28,6 @@ var spotLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var spotLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var spotLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var spotLightDirection = vec4(-0.5,3.0,2.0,1.0);
-var spotLightLimit=0;
-
-var spotLightLimitSlider = document.getElementById("spotLightLimitRange");
-spotLightLimitSlider.oninput = function() {
-    spotLightLimit = this.value;
-    document.getElementById('spotLightLimitText').value=this.value;
-}
 
 var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
 var materialDiffuse = vec4( 1.0, 0.5, 0.0, 1.0 );
@@ -351,8 +344,6 @@ var render = function() {
 
     gl.uniform1f(gl.getUniformLocation(program,"uDirLightFlag"), dirLightFlag);
     gl.uniform1f(gl.getUniformLocation(program,"uSpotLightFlag"), spotLightFlag);
-
-    gl.uniform1f( gl.getUniformLocation(program,"uSpotLightLimit"),spotLightLimit );
 
     spotLightRotationMatrix = mat4();
     // spotLightRotationMatrix = mult(spotLightRotationMatrix, rotate(theta[xAxis], vec3(1, 0, 0)));

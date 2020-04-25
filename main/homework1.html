@@ -29,9 +29,6 @@
         <p>Spot Light Rotation:</p>
         <input type="text" id="spotLightRotationText" value="0" size="1" disabled></br>
         <input type="range" min="0" max="360" value="0" class="slider" id="spotLightRotationRange">
-        <p>Spot Light Limit:</p>
-        <input type="text" id="spotLightLimitText" value="0" size="1" disabled></br>
-        <input type="range" min="0" max="360" value="0" class="slider" id="spotLightLimitRange">
     </div>
     <div class="column">
         <input type="checkbox" id="perspectiveCheckBox" name="perspectiveCheckBox">
@@ -62,14 +59,54 @@ in  vec4 aNormal;
 in  vec4 aColor;
 in  vec4 aPosition;
 
-out vec4 vColor;
-
-uniform vec4 uDirAmbientProduct, uDirDiffuseProduct, uDirSpecularProduct, uDirLightPosition;
-uniform vec4 uSpotAmbientProduct, uSpotDiffuseProduct, uSpotSpecularProduct, uSpotLightPosition, uSpotLightDirection;
-
 uniform mat4 uSpotLightRotationMatrix;
 uniform mat4 uModelViewMatrix;
 uniform mat4 uProjectionMatrix;
+
+uniform vec4 uDirLightPosition;
+uniform vec4 uSpotLightPosition;
+
+out vec3 N, dirL, dirE, spotL, spotE;
+out vec4 vColor;
+
+void main()
+{   
+    vec4 oPosition = uModelViewMatrix * aPosition;
+
+    // Transform vertex normal into eye coordinates
+    N = normalize((uModelViewMatrix*aNormal).xyz);
+
+    /*******************Directional******************/
+    // vector from vertex to light on eye coordinates
+
+    if(uDirLightPosition.w == 0.0) dirL = normalize((uModelViewMatrix * uDirLightPosition).xyz);
+    else dirL = normalize((uModelViewMatrix * uDirLightPosition - oPosition).xyz);
+    
+    // vector from vertex to viewer in eye coordinates
+    dirE = normalize(-oPosition.xyz);
+
+
+    /*******************SpotLight******************/
+    // light vector without rotation of light
+    if(uSpotLightPosition.w == 0.0) spotL = normalize((uModelViewMatrix * uSpotLightRotationMatrix * uSpotLightPosition).xyz);
+    else spotL = normalize((uModelViewMatrix * uSpotLightRotationMatrix * uSpotLightPosition - oPosition).xyz);
+    
+    // vector from vertex to viewer in eye coordinates
+    spotE = normalize(-oPosition.xyz);
+
+
+    gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
+    vColor = aColor;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+uniform vec4 uDirAmbientProduct, uDirDiffuseProduct, uDirSpecularProduct;
+uniform vec4 uSpotAmbientProduct, uSpotDiffuseProduct, uSpotSpecularProduct, uSpotLightDirection;
 
 uniform float uShininess;
 uniform float uLightCutOff;
@@ -79,28 +116,20 @@ uniform bool uSpotLightFlag;
 
 uniform float uSpotLightLimit;
 
-vec4 oPosition;
+in vec3 N, dirL, dirE, spotL, spotE;
 
-void main()
-{   
-    oPosition = uModelViewMatrix * aPosition;
+in vec4 vColor;
+out vec4 fColor;
 
-    // Transform vertex normal into eye coordinates
-    vec3 N = normalize((uModelViewMatrix*aNormal).xyz);
-
+void
+main()
+{
+    
     /*******************Directional******************/
     vec4 dirAmbient;
     vec4  dirDiffuse;
     vec4  dirSpecular;
     if(uDirLightFlag){
-        // vector from vertex to light on eye coordinates
-        vec3 dirL;
-    
-        if(uDirLightPosition.w == 0.0) dirL = normalize((uModelViewMatrix * uDirLightPosition).xyz);
-        else dirL = normalize((uModelViewMatrix * uDirLightPosition - oPosition).xyz);
-        
-        // vector from vertex to viewer in eye coordinates
-        vec3 dirE = normalize(-oPosition.xyz);
         vec3 dirH = normalize(dirL + dirE);
     
         // Compute terms in the illumination equation
@@ -125,19 +154,11 @@ void main()
     vec4 spotDiffuse;
     vec4 spotSpecular;
     if(uSpotLightFlag){
-        vec3 spotL;
-
-        // light vector without rotation of light
-        if(uSpotLightPosition.w == 0.0) spotL = normalize((uModelViewMatrix * uSpotLightRotationMatrix * uSpotLightPosition).xyz);
-        else spotL = normalize((uModelViewMatrix * uSpotLightRotationMatrix * uSpotLightPosition - oPosition).xyz);
-        
-        // vector from vertex to viewer in eye coordinates
-        vec3 spotE = normalize(-oPosition.xyz);
         vec3 spotH = normalize(spotL + spotE);
     
         vec3 spotD=uSpotLightDirection.xyz;
         spotAmbient=uSpotAmbientProduct;
-        
+
         float spotKd=max(dot(spotL,N),0.0);
         spotDiffuse=spotKd*uSpotDiffuseProduct;
         
@@ -154,29 +175,8 @@ void main()
     vec4 diffuse = dirDiffuse + spotDiffuse;
     vec4 specular = dirSpecular + spotSpecular;
 
-    gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
-
-    vColor = ambient + diffuse + specular;
-    vColor.a = 1.0;
-
-    //gl_Position = uProjectionMatrix*uModelViewMatrix *aPosition;
-    //vColor = aColor;
-}
-</script>
-
-<script id="fragment-shader" type="x-shader/x-fragment">
-#version 300 es
-
-precision mediump float;
-
-in vec4 vColor;
-out vec4 fColor;
-
-void
-main()
-{
-    
-    fColor = vColor;
+    fColor = ambient + (diffuse );
+    fColor.a = 1.0; 
 
 }
 </script>
