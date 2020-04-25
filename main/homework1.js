@@ -16,6 +16,9 @@ var normalsArray = [];
 var modelViewMatrix, projectionMatrix, normMatrix;
 var spotLightRotationMatrix;
 
+
+var globalLightAmbient = vec4(0.3, 0.3,0.3,1.0);
+
 var dirLightFlag = false;
 var dirLightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
 var dirLightAmbient = vec4(0.1, 0.1, 0.1, 1.0 );
@@ -291,6 +294,15 @@ window.onload = function init() {
     var spotDiffuseProduct = mult(spotLightDiffuse, materialDiffuse);
     var spotSpecularProduct = mult(spotLightSpecular, materialSpecular);
 
+    var dirCi = add(add(mult(globalLightAmbient,materialAmbient), mult(dirLightDiffuse,materialAmbient)), mult(dirLightDiffuse,materialDiffuse));
+    var spotCi = add(add(mult(globalLightAmbient,materialAmbient), mult(spotLightDiffuse,materialAmbient)), mult(spotLightDiffuse,materialDiffuse));
+
+    var dirCs = add(mult(globalLightAmbient,materialAmbient), mult(dirLightDiffuse,materialAmbient));
+    var spotCs = add(mult(globalLightAmbient,materialAmbient), mult(spotLightDiffuse,materialAmbient));
+
+    console.log(spotCi);
+    console.log(spotCs);
+
     var cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(colorsArray), gl.STATIC_DRAW );
@@ -334,7 +346,15 @@ window.onload = function init() {
     gl.uniform1f( gl.getUniformLocation(program,
         "uSpotLightDirection"),spotLightDirection );
 
+    gl.uniform4fv( gl.getUniformLocation(program,
+        "uDirCi"),flatten(dirCi) );
+    gl.uniform4fv( gl.getUniformLocation(program,
+        "uSpotCi"),flatten(spotCi) );
 
+    gl.uniform4fv( gl.getUniformLocation(program,
+        "uDirCs"),flatten(dirCs) );
+    gl.uniform4fv( gl.getUniformLocation(program,
+        "uSpotCs"),flatten(spotCs) );
 
     render();
 }

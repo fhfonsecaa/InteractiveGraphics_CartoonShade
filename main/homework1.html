@@ -116,6 +116,8 @@ uniform bool uSpotLightFlag;
 
 uniform float uSpotLightLimit;
 
+uniform vec4 uDirCi, uSpotCi, uDirCs, uSpotCs;
+
 in vec3 N, dirL, dirE, spotL, spotE;
 
 in vec4 vColor;
@@ -124,63 +126,97 @@ out vec4 fColor;
 void
 main()
 {
-    
-    /*******************Directional******************/
-    vec4 dirAmbient;
-    vec4  dirDiffuse;
-    vec4  dirSpecular;
-    if(uDirLightFlag){
-        vec3 dirH = normalize(dirL + dirE);
-    
-        // Compute terms in the illumination equation
-        dirAmbient = uDirAmbientProduct;
-    
-        float dirKd = max(dot(dirL, N), 0.0 );
-        dirDiffuse = dirKd*uDirDiffuseProduct;
-    
-        float Ks = pow( max(dot(N, dirH), 0.0), uShininess);
-        dirSpecular = Ks * uDirSpecularProduct;
-    
-        if( dot(dirL, N) < 0.0) dirSpecular = vec4(0.0, 0.0, 0.0, 1.0);
-    }else{
-        dirAmbient = vec4(0, 0, 0, 0);
-        dirDiffuse = vec4(0, 0, 0, 0);
-        dirSpecular = vec4(0, 0, 0, 0);
-    }
-
-
-    /*******************SpotLight******************/
-    vec4 spotAmbient;
-    vec4 spotDiffuse;
-    vec4 spotSpecular;
-    if(uSpotLightFlag){
-        vec3 spotH = normalize(spotL + spotE);
-    
-        vec3 spotD=uSpotLightDirection.xyz;
-        spotAmbient=uSpotAmbientProduct;
-
-        float spotKd=max(dot(spotL,N),0.0);
-        spotDiffuse=spotKd*uSpotDiffuseProduct;
+    /********************Phong Model*****************/
+    if(false){
+        /*******************Directional******************/
+        vec4 dirAmbient;
+        vec4 dirDiffuse;
+        vec4 dirSpecular;
+        if(uDirLightFlag){
+            vec3 dirH = normalize(dirL + dirE);
         
-        float spotKs=pow(max(dot(N,spotH),0.0), uShininess);
-        spotSpecular=spotKs*uSpotSpecularProduct;
+            // Compute terms in the illumination equation
+            dirAmbient = uDirAmbientProduct;
+        
+            float dirKd = max(dot(dirL, N), 0.0 );
+            dirDiffuse = dirKd*uDirDiffuseProduct;
+        
+            float Ks = pow( max(dot(N, dirH), 0.0), uShininess);
+            dirSpecular = Ks * uDirSpecularProduct;
+        
+            if( dot(dirL, N) < 0.0) dirSpecular = vec4(0.0, 0.0, 0.0, 1.0);
+        }else{
+            dirAmbient = vec4(0, 0, 0, 0);
+            dirDiffuse = vec4(0, 0, 0, 0);
+            dirSpecular = vec4(0, 0, 0, 0);
+        }
     
+    
+        /*******************SpotLight******************/
+        vec4 spotAmbient;
+        vec4 spotDiffuse;
+        vec4 spotSpecular;
+        if(uSpotLightFlag){
+            vec3 spotH = normalize(spotL + spotE);
+        
+            vec3 spotD=uSpotLightDirection.xyz;
+            spotAmbient=uSpotAmbientProduct;
+    
+            float spotKd=max(dot(spotL,N),0.0);
+            spotDiffuse=spotKd*uSpotDiffuseProduct;
+            
+            float spotKs=pow(max(dot(N,spotH),0.0), uShininess);
+            spotSpecular=spotKs*uSpotSpecularProduct;
+        
+        }else{
+            spotAmbient = vec4(0, 0, 0, 0);
+            spotDiffuse = vec4(0, 0, 0, 0);
+            spotSpecular = vec4(0, 0, 0, 0);
+        }
+    
+        vec4 ambient = dirAmbient + spotAmbient;
+        vec4 diffuse = dirDiffuse + spotDiffuse;
+        vec4 specular = dirSpecular + spotSpecular;
+    
+        fColor = ambient + (diffuse + specular);
+        fColor.a = 1.0;
+
     }else{
-        spotAmbient = vec4(0, 0, 0, 0);
-        spotDiffuse = vec4(0, 0, 0, 0);
-        spotSpecular = vec4(0, 0, 0, 0);
+        /*******************Cartoon Model****************/
+        /*******************Directional******************/
+        vec4 dirC;
+        if(uDirLightFlag){
+            vec3 dirH = normalize(dirL + dirE);
+        
+            float dirKd = max(dot(dirL, N), 0.0 );
+
+            if(dirKd>=0.5) dirC = uDirCi;
+            else dirC = uDirCs;
+    
+        }else{
+            dirC = vec4(0, 0, 0, 0);
+        }
+    
+    
+        /*******************SpotLight******************/
+        vec4 spotC;
+        if(uSpotLightFlag){
+            vec3 spotH = normalize(spotL + spotE);
+    
+            float spotKd=max(dot(spotL,N),0.0);
+
+            if(spotKd>=0.5) spotC = uSpotCi;
+            else spotC = uSpotCs;
+
+        }else{
+            spotC = vec4(0, 0, 0, 0);
+        }
+
+        vec4 totalC = dirC + spotC;
+    
+        fColor = totalC;
+        fColor.a = 1.0;
     }
-
-    vec4 ambient = dirAmbient + spotAmbient;
-    vec4 diffuse = dirDiffuse + spotDiffuse;
-    vec4 specular = dirSpecular + spotSpecular;
-
-    //vec4 Ci = cross()
-    //vec4 Cs = 
-
-    fColor = ambient + (diffuse );
-    fColor.a = 1.0; 
-
 }
 </script>
 
