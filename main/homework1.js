@@ -16,19 +16,25 @@ var normalsArray = [];
 var modelViewMatrix, projectionMatrix, normMatrix;
 var spotLightRotationMatrix;
 
-var dirLightFlag = true;
-var dirLightPosition = vec4(1.0, -1.0, 1.0, 0.0 );
+var dirLightFlag = false;
+var dirLightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
 var dirLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var dirLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var dirLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
 var spotLightFlag = false;
-var spotLightPosition = vec4(1.0, 2.0, 3.0, 1.0 );
+var spotLightPosition = vec4(1.0, -2.0, 3.0, 1.0 );
 var spotLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var spotLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var spotLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var spotLightDirection = vec4(-0.5,3.0,2.0,1.0);
-var spotLightLimit=50;
+var spotLightLimit=0;
+
+var spotLightLimitSlider = document.getElementById("spotLightLimitRange");
+spotLightLimitSlider.oninput = function() {
+    spotLightLimit = this.value;
+    document.getElementById('spotLightLimitText').value=this.value;
+}
 
 var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
 var materialDiffuse = vec4( 1.0, 0.5, 0.0, 1.0 );
@@ -36,8 +42,8 @@ var materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialShininess = 20.0;
 
 var eyeDistance=-0.2;
-var eyeTheta=0;
-var eyePhi=0;
+var eyeTheta=30;
+var eyePhi=30;
 var at = vec3(0.0, 0.0, 0.0);
 var up = vec3(0.0, 1.0, 0.0);
 var positionScaleFactor = 100;
@@ -49,12 +55,12 @@ eyeDistanceSlider.oninput = function() {
 }
 var eyeThetaSlider = document.getElementById("eyeThetaRange");
 eyeThetaSlider.oninput = function() {
-    eyeTheta = this.value* Math.PI/180.0;
+    eyeTheta = this.value;
     document.getElementById('eyeThetaText').value=this.value;
 }
 var eyePhiSlider = document.getElementById("eyePhiRange");
 eyePhiSlider.oninput = function() {
-    eyePhi = this.value* Math.PI/180.0;
+    eyePhi = this.value;
     document.getElementById('eyePhiText').value=this.value;
 }
 var spotLightRotationSlider = document.getElementById("spotLightRotationRange");
@@ -71,6 +77,7 @@ spotLightCheckBox.onclick = function() {
     spotLightFlag = this.checked;
     spotLightRotationRange.disabled=!spotLightFlag;
 }
+
 
 var perspectiveFlag = false;
 var fovyView = 170;
@@ -334,8 +341,7 @@ window.onload = function init() {
     gl.uniform1f( gl.getUniformLocation(program,
         "uSpotLightDirection"),spotLightDirection );
 
-    gl.uniform1f( gl.getUniformLocation(program,
-        "uSpotLightLimit"),spotLightLimit );
+
 
     render();
 }
@@ -345,6 +351,8 @@ var render = function() {
 
     gl.uniform1f(gl.getUniformLocation(program,"uDirLightFlag"), dirLightFlag);
     gl.uniform1f(gl.getUniformLocation(program,"uSpotLightFlag"), spotLightFlag);
+
+    gl.uniform1f( gl.getUniformLocation(program,"uSpotLightLimit"),spotLightLimit );
 
     spotLightRotationMatrix = mat4();
     // spotLightRotationMatrix = mult(spotLightRotationMatrix, rotate(theta[xAxis], vec3(1, 0, 0)));
@@ -362,7 +370,7 @@ var render = function() {
                         false, flatten(projectionMatrix));
 
 
-    modelViewMatrix = lookAt(get_eye(eyeDistance,eyeTheta,eyePhi),at,up);
+    modelViewMatrix = lookAt(get_eye(eyeDistance,radians(eyeTheta),radians(eyePhi)),at,up);
     gl.uniformMatrix4fv(gl.getUniformLocation(program,"uModelViewMatrix"),
                         false, flatten(modelViewMatrix));
 

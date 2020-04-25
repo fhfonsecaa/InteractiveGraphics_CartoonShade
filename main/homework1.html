@@ -16,11 +16,11 @@
         <input type="text" id="eyeDistanceText" value="-0.2" size="1" disabled></br>
         <input type="range" min="-100" max="100" value="-20" class="slider" id="eyeDistanceRange">
         <p>Theta Angle:</p>
-        <input type="text" id="eyeThetaText" value="0" size="1" disabled></br>
-        <input type="range" min="0" max="360" value="0" class="slider" id="eyeThetaRange">
+        <input type="text" id="eyeThetaText" value="30" size="1" disabled></br>
+        <input type="range" min="0" max="360" value="30" class="slider" id="eyeThetaRange">
         <p>Phi Angle:</p>
-        <input type="text" id="eyePhiText" value="0" size="1" disabled></br>
-        <input type="range" min="0" max="360" value="0" class="slider" id="eyePhiRange">
+        <input type="text" id="eyePhiText" value="30" size="1" disabled></br>
+        <input type="range" min="0" max="360" value="30" class="slider" id="eyePhiRange">
         </br>
         <input type="checkbox" id="dirLightCheckBox" name="dirLightCheckBox">
         <label for="dirLightCheckBox">Directional Light</label><br>
@@ -29,6 +29,9 @@
         <p>Spot Light Rotation:</p>
         <input type="text" id="spotLightRotationText" value="0" size="1" disabled></br>
         <input type="range" min="0" max="360" value="0" class="slider" id="spotLightRotationRange">
+        <p>Spot Light Limit:</p>
+        <input type="text" id="spotLightLimitText" value="0" size="1" disabled></br>
+        <input type="range" min="0" max="360" value="0" class="slider" id="spotLightLimitRange">
     </div>
     <div class="column">
         <input type="checkbox" id="perspectiveCheckBox" name="perspectiveCheckBox">
@@ -134,17 +137,13 @@ void main()
     
         vec3 spotD=uSpotLightDirection.xyz;
         spotAmbient=uSpotAmbientProduct;
+        
         float spotKd=max(dot(spotL,N),0.0);
         spotDiffuse=spotKd*uSpotDiffuseProduct;
         
         float spotKs=pow(max(dot(N,spotH),0.0), uShininess);
         spotSpecular=spotKs*uSpotSpecularProduct;
     
-        if(dot(spotL,N)<0.0) spotSpecular=vec4(0.0,0.0,0.0,1.0);
-        
-        float lEffect= dot(normalize(spotD), normalize((spotL+spotE)));
-        
-        //if(lEffect>lCutOff)
     }else{
         spotAmbient = vec4(0, 0, 0, 0);
         spotDiffuse = vec4(0, 0, 0, 0);
