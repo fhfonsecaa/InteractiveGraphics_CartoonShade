@@ -22,6 +22,12 @@
         <input type="text" id="eyePhiText" value="30" size="1" disabled></br>
         <input type="range" min="0" max="360" value="30" class="slider" id="eyePhiRange">
         </br>
+        </br>
+        <input type="radio" id="phongModel" name="shaderModel" value="male">
+        <label for="phongModel">Phong Model</label><br>
+        <input type="radio" id="cartoonModel" name="shaderModel" value="female">
+        <label for="cartoonModel">Cartoon Model</label><br>
+        </br>
         <input type="checkbox" id="dirLightCheckBox" name="dirLightCheckBox">
         <label for="dirLightCheckBox">Directional Light</label><br>
         <input type="checkbox" id="spotLightCheckBox" name="spotLightCheckBox">
@@ -35,7 +41,7 @@
     </div>
     <div class="column">
         <input type="checkbox" id="perspectiveCheckBox" name="perspectiveCheckBox">
-        <label for="perspectiveCheckBox">Activate perspective</label><br>
+        <label for="perspectiveCheckBox">Perspective projection</label><br>
         <p>Fovy:</p>
         <input type="text" id="fovyViewText" value="170" size="1" disabled></br>
         <input type="range" min="0" max="360" value="170" class="slider" id="fovyViewRange">
@@ -133,7 +139,7 @@ void
 main()
 {
     /********************Phong Model*****************/
-    if(true){
+    if(false){
         /*******************Directional******************/
         vec4 dirAmbient;
         vec4 dirDiffuse;
@@ -211,7 +217,6 @@ main()
             dirC = vec4(0, 0, 0, 0);
         }
     
-    
         /*******************SpotLight******************/
         vec4 spotC;
         if(uSpotLightFlag){
@@ -222,6 +227,10 @@ main()
             if(spotKd>=0.5) spotC = uSpotCi;
             else spotC = uSpotCs;
 
+            float dotdir = dot(spotH,-spotLigthPos);
+            if(dotdir < uSpotLightLimit){
+                spotC = vec4(0, 0, 0, 0);
+            }
         }else{
             spotC = vec4(0, 0, 0, 0);
         }
@@ -242,5 +251,6 @@ main()
 <canvas id="gl-canvas" width="1024" height="1024">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
+
 </body>
 </html>
