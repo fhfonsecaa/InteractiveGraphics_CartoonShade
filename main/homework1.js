@@ -31,6 +31,7 @@ var spotLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var spotLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var spotLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var spotLightDirection = vec4(-0.5,3.0,2.0,1.0);
+var spotLightLimit = 20;
 
 var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
 var materialDiffuse = vec4( 1.0, 0.5, 0.0, 1.0 );
@@ -64,6 +65,11 @@ spotLightRotationSlider.oninput = function() {
     spotLightRotation = this.value;
     document.getElementById('spotLightRotationText').value=this.value;
 }
+var spotLightLimitSlider = document.getElementById("spotLightLimitRange");
+spotLightLimitSlider.oninput = function() {
+    spotLightLimit = this.value;
+    document.getElementById('spotLightLimitText').value=this.value;
+}
 var dirLightCheckBox = document.getElementById("dirLightCheckBox");
 dirLightCheckBox.onclick = function() {
     dirLightFlag = this.checked;
@@ -71,7 +77,8 @@ dirLightCheckBox.onclick = function() {
 var spotLightCheckBox = document.getElementById("spotLightCheckBox");
 spotLightCheckBox.onclick = function() {
     spotLightFlag = this.checked;
-    spotLightRotationRange.disabled=!spotLightFlag;
+    spotLightRotationSlider.disabled=!spotLightFlag;
+    spotLightLimitSlider.disabled=!spotLightFlag;
 }
 
 
@@ -228,12 +235,13 @@ function quad(a, b, c, d) {
 }
 
 function initInputElements(){
-    spotLightRotationRange.disabled=!spotLightFlag;
-
     fovyViewSlider.disabled=!perspectiveFlag;
     aspectViewSlider.disabled=!perspectiveFlag;
     nearViewSlider.disabled=!perspectiveFlag;
     farViewSlider.disabled=!perspectiveFlag;
+
+    spotLightRotationSlider.disabled=!spotLightFlag;
+    spotLightLimitSlider.disabled=!spotLightFlag;
 }
 
 function loadSolid(){
@@ -294,11 +302,11 @@ window.onload = function init() {
     var spotDiffuseProduct = mult(spotLightDiffuse, materialDiffuse);
     var spotSpecularProduct = mult(spotLightSpecular, materialSpecular);
 
-    var dirCi = add(add(mult(globalLightAmbient,materialAmbient), mult(dirLightDiffuse,materialAmbient)), mult(dirLightDiffuse,materialDiffuse));
-    var spotCi = add(add(mult(globalLightAmbient,materialAmbient), mult(spotLightDiffuse,materialAmbient)), mult(spotLightDiffuse,materialDiffuse));
+    var dirCi = add(add(mult(globalLightAmbient,materialAmbient),mult(dirLightDiffuse,materialAmbient)),mult(dirLightDiffuse,materialDiffuse));
+    var spotCi = add(add(mult(globalLightAmbient,materialAmbient), mult(spotLightDiffuse,materialAmbient)),mult(spotLightDiffuse,materialDiffuse));
 
-    var dirCs = add(mult(globalLightAmbient,materialAmbient), mult(dirLightDiffuse,materialAmbient));
-    var spotCs = add(mult(globalLightAmbient,materialAmbient), mult(spotLightDiffuse,materialAmbient));
+    var dirCs = add(mult(globalLightAmbient,materialAmbient),mult(dirLightDiffuse,materialAmbient));
+    var spotCs = add(mult(globalLightAmbient,materialAmbient),mult(spotLightDiffuse,materialAmbient));
 
     console.log(spotCi);
     console.log(spotCs);
@@ -364,6 +372,9 @@ var render = function() {
 
     gl.uniform1f(gl.getUniformLocation(program,"uDirLightFlag"), dirLightFlag);
     gl.uniform1f(gl.getUniformLocation(program,"uSpotLightFlag"), spotLightFlag);
+    
+    console.log(Math.cos(radians(spotLightLimit)));
+    gl.uniform1f(gl.getUniformLocation(program,"uSpotLightLimit"), Math.cos(radians(spotLightLimit)));
 
     spotLightRotationMatrix = mat4();
     spotLightRotationMatrix = mult(spotLightRotationMatrix, rotate(spotLightRotation, vec3(0, 1, 0)));
@@ -378,14 +389,9 @@ var render = function() {
     gl.uniformMatrix4fv(gl.getUniformLocation(program,"uProjectionMatrix"),
                         false, flatten(projectionMatrix));
 
-
     modelViewMatrix = lookAt(get_eye(eyeDistance,radians(eyeTheta),radians(eyePhi)),at,up);
     gl.uniformMatrix4fv(gl.getUniformLocation(program,"uModelViewMatrix"),
                         false, flatten(modelViewMatrix));
-
-    normMatrix = normalMatrix(modelViewMatrix, true);
-    gl.uniformMatrix3fv(gl.getUniformLocation(program,"uNormalMatrix"),
-                        false, flatten(normMatrix)  );
 
     gl.drawArrays( gl.TRIANGLES, 0, numVertices );
     requestAnimationFrame(render);

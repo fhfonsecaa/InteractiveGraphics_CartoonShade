@@ -29,6 +29,9 @@
         <p>Spot Light Rotation:</p>
         <input type="text" id="spotLightRotationText" value="0" size="1" disabled></br>
         <input type="range" min="0" max="360" value="0" class="slider" id="spotLightRotationRange">
+        <p>Spot Light Limit:</p>
+        <input type="text" id="spotLightLimitText" value="0" size="1" disabled></br>
+        <input type="range" min="0" max="180" value="0" class="slider" id="spotLightLimitRange">
     </div>
     <div class="column">
         <input type="checkbox" id="perspectiveCheckBox" name="perspectiveCheckBox">
@@ -66,7 +69,7 @@ uniform mat4 uProjectionMatrix;
 uniform vec4 uDirLightPosition;
 uniform vec4 uSpotLightPosition;
 
-out vec3 N, dirL, dirE, spotL, spotE;
+out vec3 N, dirL, dirE, spotL, spotE, spotLigthPos, spotN;
 out vec4 vColor;
 
 void main()
@@ -87,6 +90,8 @@ void main()
 
 
     /*******************SpotLight******************/
+    spotLigthPos = (uSpotLightRotationMatrix * uSpotLightPosition).xyz;
+
     // light vector without rotation of light
     if(uSpotLightPosition.w == 0.0) spotL = normalize((uModelViewMatrix * uSpotLightRotationMatrix * uSpotLightPosition).xyz);
     else spotL = normalize((uModelViewMatrix * uSpotLightRotationMatrix * uSpotLightPosition - oPosition).xyz);
@@ -94,6 +99,7 @@ void main()
     // vector from vertex to viewer in eye coordinates
     spotE = normalize(-oPosition.xyz);
 
+    spotN = normalize((uProjectionMatrix * uModelViewMatrix * aNormal).xyz);
 
     gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
     vColor = aColor;
@@ -118,7 +124,7 @@ uniform float uSpotLightLimit;
 
 uniform vec4 uDirCi, uSpotCi, uDirCs, uSpotCs;
 
-in vec3 N, dirL, dirE, spotL, spotE;
+in vec3 N, dirL, dirE, spotL, spotE, spotLigthPos, spotN;
 
 in vec4 vColor;
 out vec4 fColor;
@@ -127,7 +133,7 @@ void
 main()
 {
     /********************Phong Model*****************/
-    if(false){
+    if(true){
         /*******************Directional******************/
         vec4 dirAmbient;
         vec4 dirDiffuse;
@@ -167,7 +173,15 @@ main()
             
             float spotKs=pow(max(dot(N,spotH),0.0), uShininess);
             spotSpecular=spotKs*uSpotSpecularProduct;
-        
+
+            if(dot(spotL, spotN) < 0.0) spotSpecular = vec4(0, 0, 0, 1.0);
+
+            float dotdir = dot(spotH,-spotLigthPos);
+            if(dotdir < uSpotLightLimit){
+                spotAmbient = vec4(0, 0, 0, 0);
+                spotDiffuse = vec4(0, 0, 0, 0);
+                spotSpecular = vec4(0, 0, 0, 0);
+            }
         }else{
             spotAmbient = vec4(0, 0, 0, 0);
             spotDiffuse = vec4(0, 0, 0, 0);
