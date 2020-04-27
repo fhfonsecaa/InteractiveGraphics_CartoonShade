@@ -37,8 +37,6 @@ var materialDiffuse = vec4( 1.0, 0.5, 0.0, 1.0 );
 var materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialShininess = 20.0;
 
-var texture;
-
 var eyeDistance=-0.1;
 var eyeTheta=30;
 var eyePhi=30;
@@ -82,7 +80,6 @@ spotLightCheckBox.onclick = function() {
     spotLightLimitSlider.disabled=!spotLightFlag;
 }
 
-
 var perspectiveFlag = false;
 var fovyView = 170;
 var aspectView = 1;
@@ -121,10 +118,15 @@ perspectiveCheckBox.onclick = function() {
 var phongModelFlag = true;
 
 var phongModelRadioButton = document.getElementById("phongModelRadioButton");
+var cartoonModelRadioButton = document.getElementById("cartoonModelRadioButton");
 phongModelRadioButton.onclick = function() {
     phongModelFlag = this.checked;
 }
+cartoonModelRadioButton.onclick = function() {
+    phongModelFlag = !this.checked;
+}
 
+var texture = null;
 var textureFlag = false;
 
 var textureCheckBox = document.getElementById("textureCheckBox");
@@ -396,8 +398,9 @@ window.onload = function init() {
     var texCoordLoc = gl.getAttribLocation(program, "aTexCoord");
     gl.vertexAttribPointer(texCoordLoc, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(texCoordLoc);
+    
     var image = document.getElementById("texImage");
-    // configureTexture(image);
+    configureTexture(image);
 
     render();
 }

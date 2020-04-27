@@ -23,7 +23,7 @@
         <input type="range" min="0" max="360" value="30" class="slider" id="eyePhiRange">
         </br>
         </br>
-        <input type="radio" id="phongModelRadioButton" name="shaderModel">
+        <input type="radio" id="phongModelRadioButton" name="shaderModel" checked>
         <label for="phongModelRadioButton">Phong Model</label><br>
         <input type="radio" id="cartoonModelRadioButton" name="shaderModel">
         <label for="cartoonModelRadioButton">Cartoon Model</label><br>
@@ -32,15 +32,14 @@
         <label for="dirLightCheckBox">Directional Light</label><br>
         <input type="checkbox" id="spotLightCheckBox" name="lightCheckBox">
         <label for="spotLightCheckBox">Spot Light</label><br>
+        <input type="checkbox" id="textureCheckBox" name="textureCheckBox">
+        <label for="textureCheckBox">Texture</label><br>
         <p>Spot Light Rotation:</p>
         <input type="text" id="spotLightRotationText" value="0" size="1" disabled></br>
         <input type="range" min="0" max="360" value="0" class="slider" id="spotLightRotationRange">
         <p>Spot Light Limit:</p>
         <input type="text" id="spotLightLimitText" value="0" size="1" disabled></br>
         <input type="range" min="0" max="180" value="0" class="slider" id="spotLightLimitRange">
-        </br>
-        <input type="checkbox" id="textureCheckBox" name="textureCheckBox">
-        <label for="textureCheckBox">Texture</label><br>
     </div>
     <div class="column">
         <input type="checkbox" id="perspectiveCheckBox" name="perspectiveCheckBox">
@@ -153,7 +152,7 @@ uniform sampler2D uTextureMap;
 
 void
 main()
-{
+{   
     /********************Phong Model*****************/
     if(uPhongModelFlag){
         /*******************Directional******************/
@@ -213,8 +212,16 @@ main()
         vec4 ambient = dirAmbient + spotAmbient;
         vec4 diffuse = dirDiffuse + spotDiffuse;
         vec4 specular = dirSpecular + spotSpecular;
-    
-        fColor = ambient + (diffuse + specular);
+
+        if(uTextureFlag){
+            if(uSpotLightFlag || uDirLightFlag){
+                fColor = ambient + texture(uTextureMap, vTexCoord)*(diffuse + specular);
+            }else{
+                fColor = texture(uTextureMap, vTexCoord);
+            }
+        }else{
+            fColor = ambient + (diffuse + specular);
+        }
         fColor.a = 1.0;
 
     }else{
@@ -253,10 +260,17 @@ main()
 
         vec4 totalC = dirC + spotC;
     
-        fColor = totalC;
+        if(uTextureFlag){
+            if(uSpotLightFlag || uDirLightFlag){
+                fColor = totalC*texture(uTextureMap,vTexCoord);
+            }else{
+                fColor = texture(uTextureMap, vTexCoord);
+            }
+        }else{
+            fColor = totalC;
+        }
         fColor.a = 1.0;
-        //fColor = texture(uTextureMap, vTexCoord);
-}
+    }
 }
 </script>
 
