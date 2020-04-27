@@ -32,10 +32,10 @@ var spotLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var spotLightDirection = vec4(-0.5,3.0,2.0,1.0);
 var spotLightLimit = 20;
 
-var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
+var materialAmbient = vec4( 0.1, 0.2, 0.1, 1.0 );
 var materialDiffuse = vec4( 1.0, 0.5, 0.0, 1.0 );
 var materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
-var materialShininess = 20.0;
+var materialShininess = 20;
 
 var eyeDistance=-0.1;
 var eyeTheta=30;
