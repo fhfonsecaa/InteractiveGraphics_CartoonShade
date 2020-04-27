@@ -23,14 +23,14 @@
         <input type="range" min="0" max="360" value="30" class="slider" id="eyePhiRange">
         </br>
         </br>
-        <input type="radio" id="phongModel" name="shaderModel" value="male">
-        <label for="phongModel">Phong Model</label><br>
-        <input type="radio" id="cartoonModel" name="shaderModel" value="female">
-        <label for="cartoonModel">Cartoon Model</label><br>
+        <input type="radio" id="phongModelRadioButton" name="shaderModel">
+        <label for="phongModelRadioButton">Phong Model</label><br>
+        <input type="radio" id="cartoonModelRadioButton" name="shaderModel">
+        <label for="cartoonModelRadioButton">Cartoon Model</label><br>
         </br>
-        <input type="checkbox" id="dirLightCheckBox" name="dirLightCheckBox">
+        <input type="checkbox" id="dirLightCheckBox" name="lightCheckBox">
         <label for="dirLightCheckBox">Directional Light</label><br>
-        <input type="checkbox" id="spotLightCheckBox" name="spotLightCheckBox">
+        <input type="checkbox" id="spotLightCheckBox" name="lightCheckBox">
         <label for="spotLightCheckBox">Spot Light</label><br>
         <p>Spot Light Rotation:</p>
         <input type="text" id="spotLightRotationText" value="0" size="1" disabled></br>
@@ -38,6 +38,9 @@
         <p>Spot Light Limit:</p>
         <input type="text" id="spotLightLimitText" value="0" size="1" disabled></br>
         <input type="range" min="0" max="180" value="0" class="slider" id="spotLightLimitRange">
+        </br>
+        <input type="checkbox" id="textureCheckBox" name="textureCheckBox">
+        <label for="textureCheckBox">Texture</label><br>
     </div>
     <div class="column">
         <input type="checkbox" id="perspectiveCheckBox" name="perspectiveCheckBox">
@@ -78,6 +81,10 @@ uniform vec4 uSpotLightPosition;
 out vec3 N, dirL, dirE, spotL, spotE, spotLigthPos, spotN;
 out vec4 vColor;
 
+in vec2 aTexCoord;
+out vec2 vTexCoord;
+
+
 void main()
 {   
     vec4 oPosition = uModelViewMatrix * aPosition;
@@ -109,6 +116,8 @@ void main()
 
     gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
     vColor = aColor;
+    vTexCoord = aTexCoord;
+
 }
 </script>
 
@@ -126,6 +135,10 @@ uniform float uLightCutOff;
 uniform bool uDirLightFlag;
 uniform bool uSpotLightFlag;
 
+uniform bool uPhongModelFlag;
+
+uniform bool uTextureFlag;
+
 uniform float uSpotLightLimit;
 
 uniform vec4 uDirCi, uSpotCi, uDirCs, uSpotCs;
@@ -135,11 +148,14 @@ in vec3 N, dirL, dirE, spotL, spotE, spotLigthPos, spotN;
 in vec4 vColor;
 out vec4 fColor;
 
+in vec2 vTexCoord;
+uniform sampler2D uTextureMap;
+
 void
 main()
 {
     /********************Phong Model*****************/
-    if(false){
+    if(uPhongModelFlag){
         /*******************Directional******************/
         vec4 dirAmbient;
         vec4 dirDiffuse;
@@ -239,7 +255,8 @@ main()
     
         fColor = totalC;
         fColor.a = 1.0;
-    }
+        //fColor = texture(uTextureMap, vTexCoord);
+}
 }
 </script>
 
@@ -251,6 +268,6 @@ main()
 <canvas id="gl-canvas" width="1024" height="1024">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
-
+<img id = "texImage" src = "textureImage8.jpg" hidden></img>
 </body>
 </html>

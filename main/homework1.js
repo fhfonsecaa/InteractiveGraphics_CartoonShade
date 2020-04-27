@@ -16,10 +16,9 @@ var normalsArray = [];
 var modelViewMatrix, projectionMatrix, normMatrix;
 var spotLightRotationMatrix;
 
-
 var globalLightAmbient = vec4(0.3, 0.3,0.3,1.0);
 
-var dirLightFlag = false;
+var dirLightFlag = true;
 var dirLightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
 var dirLightAmbient = vec4(0.1, 0.1, 0.1, 1.0 );
 var dirLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -37,6 +36,8 @@ var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
 var materialDiffuse = vec4( 1.0, 0.5, 0.0, 1.0 );
 var materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var materialShininess = 20.0;
+
+var texture;
 
 var eyeDistance=-0.1;
 var eyeTheta=30;
@@ -115,6 +116,20 @@ perspectiveCheckBox.onclick = function() {
     aspectViewSlider.disabled=!perspectiveFlag;
     nearViewSlider.disabled=!perspectiveFlag;
     farViewSlider.disabled=!perspectiveFlag;
+}
+
+var phongModelFlag = true;
+
+var phongModelRadioButton = document.getElementById("phongModelRadioButton");
+phongModelRadioButton.onclick = function() {
+    phongModelFlag = this.checked;
+}
+
+var textureFlag = false;
+
+var textureCheckBox = document.getElementById("textureCheckBox");
+textureCheckBox.onclick = function() {
+    textureFlag = this.checked;
 }
 
 var vertices = [
@@ -242,6 +257,10 @@ function initInputElements(){
 
     spotLightRotationSlider.disabled=!spotLightFlag;
     spotLightLimitSlider.disabled=!spotLightFlag;
+
+    dirLightCheckBox.checked = dirLightFlag;
+
+    phongModelRadioButton.checked = phongModelFlag;
 }
 
 function loadSolid(){
@@ -276,6 +295,19 @@ function get_eye(distance,theta,phi) {
     return vEye;
 }
 
+function configureTexture(image) {
+    texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB,
+         gl.RGB, gl.UNSIGNED_BYTE, image);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
+                      gl.NEAREST_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+    gl.uniform1i(gl.getUniformLocation(program, "uTextureMap"), 0);
+}
+
 window.onload = function init() {
     canvas = document.getElementById( "gl-canvas" );
 
@@ -307,9 +339,6 @@ window.onload = function init() {
 
     var dirCs = add(mult(globalLightAmbient,materialAmbient),mult(dirLightDiffuse,materialAmbient));
     var spotCs = add(mult(globalLightAmbient,materialAmbient),mult(spotLightDiffuse,materialAmbient));
-
-    console.log(spotCi);
-    console.log(spotCs);
 
     var cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
@@ -364,6 +393,12 @@ window.onload = function init() {
     gl.uniform4fv( gl.getUniformLocation(program,
         "uSpotCs"),flatten(spotCs) );
 
+    var texCoordLoc = gl.getAttribLocation(program, "aTexCoord");
+    gl.vertexAttribPointer(texCoordLoc, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(texCoordLoc);
+    var image = document.getElementById("texImage");
+    // configureTexture(image);
+
     render();
 }
 
@@ -372,8 +407,10 @@ var render = function() {
 
     gl.uniform1f(gl.getUniformLocation(program,"uDirLightFlag"), dirLightFlag);
     gl.uniform1f(gl.getUniformLocation(program,"uSpotLightFlag"), spotLightFlag);
-    
-    console.log(Math.cos(radians(spotLightLimit)));
+    gl.uniform1f(gl.getUniformLocation(program,"uPhongModelFlag"), phongModelFlag);
+
+    gl.uniform1f(gl.getUniformLocation(program,"uTextureFlag"), textureFlag);
+
     gl.uniform1f(gl.getUniformLocation(program,"uSpotLightLimit"), Math.cos(radians(spotLightLimit)));
 
     spotLightRotationMatrix = mat4();
