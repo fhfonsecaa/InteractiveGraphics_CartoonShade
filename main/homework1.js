@@ -25,7 +25,7 @@ var dirLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var dirLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
 var spotLightFlag = false;
-var spotLightPosition = vec4(1.0, -2.0, 3.0, 1.0 );
+var spotLightPosition = vec4(1.0, -2.0, -1.0, 1.0 );
 var spotLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var spotLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var spotLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -84,7 +84,7 @@ var perspectiveFlag = false;
 var fovyView = 170;
 var aspectView = 1;
 var nearView = -1;
-var farView = 0.2;
+var farView = 0.1;
 var viewScaleFactor = 100;
 var fovyViewSlider = document.getElementById("fovyViewRange");
 fovyViewSlider.oninput = function() {
@@ -300,11 +300,9 @@ function get_eye(distance,theta,phi) {
 function configureTexture(image) {
     texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB,
-         gl.RGB, gl.UNSIGNED_BYTE, image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
     gl.generateMipmap(gl.TEXTURE_2D);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
-                      gl.NEAREST_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
     gl.uniform1i(gl.getUniformLocation(program, "uTextureMap"), 0);
